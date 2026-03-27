@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EdgeMaster - Tease & Challenge</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap');
+
+:root {
+  --neon-pink: #ff2d78;
+  --neon-purple: #9d00ff;
+  --neon-cyan: #00f5ff;
+}
+
+* { box-sizing: border-box; }
+
+/* ── Mobile base ── */
+html {
+  -webkit-text-size-adjust: 100%;
+  height: -webkit-fill-available;
+}
+
+body {
+  background: #0a0a0f;
+  font-family: 'Rajdhani', 'Hiragino Sans', sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent 300ms tap delay on all interactive elements */
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Prevent iOS from zooming on input focus (needs 16px font) */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+.font-orb { font-family: 'Orbitron', monospace; }
+
+/* Glow effects */
+.glow-pink { text-shadow: 0 0 10px #ff2d78, 0 0 25px #ff2d78; }
+.glow-purple { text-shadow: 0 0 10px #9d00ff, 0 0 25px #9d00ff; }
+.glow-cyan { text-shadow: 0 0 10px #00f5ff, 0 0 20px #00f5ff; }
+.box-glow-pink { box-shadow: 0 0 20px rgba(255,45,120,0.4), inset 0 0 20px rgba(255,45,120,0.05); }
+.box-glow-purple { box-shadow: 0 0 20px rgba(157,0,255,0.4), inset 0 0 20px rgba(157,0,255,0.05); }
+
+/* Background grid */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,45,120,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,45,120,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Animated background */
+@keyframes bgPulse {
+  0%,100% { background: radial-gradient(ellipse at 20% 50%, rgba(157,0,255,0.08) 0%, transparent 60%),
+                         radial-gradient(ellipse at 80% 50%, rgba(255,45,120,0.06) 0%, transparent 60%),
+                         #0a0a0f; }
+  50%      { background: radial-gradient(ellipse at 30% 40%, rgba(255,45,120,0.1) 0%, transparent 60%),
+                         radial-gradient(ellipse at 70% 60%, rgba(157,0,255,0.08) 0%, transparent 60%),
+                         #0a0a0f; }
+}
+body { animation: bgPulse 8s ease-in-out infinite; }
+
+/* Timer ring */
+.timer-svg circle.progress {
+  transform-origin: 90px 90px;
+  transform: rotate(-90deg);
+  transition: stroke-dashoffset 1s linear;
+  stroke-linecap: round;
+}
+
+/* Challenge card animations */
+@keyframes challengeIn {
+  0%   { transform: translateY(-20px) scale(0.95); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes pulseBorder {
+  0%,100% { box-shadow: 0 0 15px rgba(255,45,120,0.3); }
+  50%      { box-shadow: 0 0 40px rgba(255,45,120,0.8), 0 0 80px rgba(157,0,255,0.3); }
+}
+.challenge-active {
+  animation: challengeIn 0.4s ease-out, pulseBorder 2s ease-in-out infinite !important;
+}
+
+/* Floating messages */
+@keyframes floatUp {
+  0%   { transform: translateX(-50%) translateY(0); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-120px); opacity: 0; }
+}
+.float-msg {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: floatUp 2.5s ease-out forwards;
+  pointer-events: none;
+  z-index: 999;
+  white-space: nowrap;
+  font-family: 'Orbitron', monospace;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  padding: 6px 16px;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+
+/* Urgent pulse text */
+@keyframes urgentFlash {
+  0%,100% { color: #ff2d78; }
+  50%      { color: #fff; }
+}
+.urgent-text { animation: urgentFlash 0.4s ease-in-out infinite; }
+
+/* Level bar */
+.xp-bar { background: linear-gradient(90deg, #ff2d78, #9d00ff, #00f5ff); transition: width 0.6s ease; }
+
+/* Buttons */
+.btn-grad {
+  background: linear-gradient(135deg, #ff2d78, #9d00ff);
+  transition: all 0.25s ease;
+}
+.btn-grad:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,45,120,0.5); }
+.btn-grad:active:not(:disabled) { transform: translateY(0); }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255,45,120,0.4);
+  transition: all 0.25s ease;
+}
+.btn-outline:hover:not(:disabled) {
+  background: rgba(255,45,120,0.1);
+  border-color: #ff2d78;
+  box-shadow: 0 0 12px rgba(255,45,120,0.3);
+}
+.btn-outline.active {
+  background: linear-gradient(135deg, rgba(255,45,120,0.3), rgba(157,0,255,0.3));
+  border-color: #ff2d78;
+}
+
+/* Modal */
+.modal-bg { backdrop-filter: blur(12px); background: rgba(0,0,0,0.85); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #0a0a0f; }
+::-webkit-scrollbar-thumb { background: #9d00ff; border-radius: 3px; }
+
+/* Slide up anim */
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.slide-up { animation: slideUp 0.4s ease-out; }
+
+/* Particles */
+@keyframes particleRise {
+  0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.6; }
+  90%  { opacity: 0.3; }
+  100% { transform: translateY(-5vh) rotate(720deg); opacity: 0; }
+}
+.particle {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleRise linear infinite;
+}
+
+/* Message area transition */
+#msgText { transition: opacity 0.3s ease; }
+
+/* Countdown digits */
+@keyframes countPop {
+  0%   { transform: scale(1.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.count-pop { animation: countPop 0.2s ease-out; }
+
+/* Success flash */
+@keyframes successFlash {
+  0%   { background-color: rgba(0,245,255,0); }
+  30%  { background-color: rgba(0,245,255,0.12); }
+  100% { background-color: rgba(0,245,255,0); }
+}
+.flash-overlay { animation: successFlash 0.8s ease-out; }
+
+/* Blink cursor */
+@keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0; } }
+.cursor::after { content:'|'; animation: blink 1s step-end infinite; color:#ff2d78; margin-left:2px; }
+
+/* ── Overlay text: バラバラエフェクト ── */
+@keyframes charFlyIn {
+  0%   { opacity:0; transform:translate(var(--dx),var(--dy)) rotate(var(--dr)) scale(0.1); }
+  25%  { opacity:1; transform:translate(0,0) rotate(0deg) scale(1.15); filter:blur(0); }
+  40%  { transform:translate(0,0) rotate(0deg) scale(1); }
+  70%  { opacity:1; transform:translate(0,0) rotate(0deg) scale(1); }
+  100% { opacity:0; transform:translate(calc(var(--dx)*0.5),calc(var(--dy)*0.5)) rotate(calc(var(--dr)*-0.4)) scale(0.4); filter:blur(3px); }
+}
+.overlay-txt {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 20;
+  text-align: center;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 10px 28px;
+  border-radius: 10px;
+  max-width: 85%;
+  white-space: nowrap;
+}
+.overlay-char {
+  display: inline-block;
+  background: linear-gradient(135deg, #ff2d78 0%, #ffb3cc 40%, #ff6eb7 70%, #ff2d78 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 10px rgba(255,45,120,0.95)) drop-shadow(0 0 22px rgba(255,45,120,0.6));
+  animation: charFlyIn var(--dur,3.5s) ease-in-out calc(var(--i,0) * 0.045s) both;
+}
+
+/* Settings modal inner scroll */
+#overlayTextList { max-height: 260px; overflow-y: auto; }
+</style>
+</head>
+<body class="text-white min-h-screen">
+
+<!-- ══════════════════════════════════════
+     AGE GATE
+════════════════════════════════════════ -->
+<div id="ageGate" class="fixed inset-0 z-50 modal-bg flex items-center justify-center p-4">
+  <div class="bg-gray-950 border border-pink-900 rounded-2xl p-8 max-w-md w-full text-center box-glow-pink">
+    <div class="text-5xl mb-3">🔞</div>
+    <h1 class="font-orb text-3xl font-black tracking-widest mb-1">
+      <span class="text-pink-400 glow-pink">EDGE</span><span class="text-purple-400">MASTER</span>
+    </h1>
+    <p class="text-gray-500 text-xs tracking-widest mb-6">TEASE &amp; CHALLENGE</p>
+    <div class="border-t border-gray-800 mb-6"></div>
+    <p class="text-gray-400 text-sm leading-relaxed mb-6">
+      このアプリは <strong class="text-pink-400">18歳以上</strong> の成人向けフィクション・ロールプレイゲームです。<br>
+      すべて架空の体験であり、合意に基づいた楽しみを目的としています。<br><br>
+      続行することで、あなたが 18 歳以上であることを確認します。
+    </p>
+    <button onclick="enterApp()" class="btn-grad w-full py-4 rounded-xl font-orb font-bold text-base tracking-wider mb-3">
+      ✓ 18歳以上 — 入場する
+    </button>
+    <button onclick="denyEntry()" class="btn-outline w-full py-3 rounded-xl text-sm text-gray-500">
+      18歳未満 — 退場する
+    </button>
+  </div>
+</div>
+
+<!-- Under-age message -->
+<div id="underageMsg" class="hidden fixed inset-0 z-50 modal-bg flex items-center justify-center">
+  <div class="text-center">
+    <div class="text-6xl mb-4">🚫</div>
+    <p class="text-red-400 font-bold text-xl">アクセスできません</p>
+    <p class="text-gray-500 text-sm mt-2">このコンテンツは 18 歳以上対象です</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN APP
+════════════════════════════════════════ -->
+<div id="mainApp" class="hidden relative z-10 min-h-screen flex flex-col">
+
+  <!-- Particles container -->
+  <div id="particlesRoot" class="fixed inset-0 pointer-events-none z-0 overflow-hidden"></div>
+
+  <!-- HEADER -->
+  <header class="relative z-10 border-b border-gray-800 bg-black/40 backdrop-blur-md px-6 py-3 flex items-center justify-between">
+    <div>
+      <h1 class="font-orb text-xl font-black tracking-widest">
+        <span class="text-pink-400 glow-pink">EDGE</span><span class="text-purple-400">MASTER</span>
+      </h1>
+      <p class="text-gray-600 text-xs tracking-widest">TEASE &amp; CHALLENGE</p>
+    </div>
+
+    <!-- Level + XP -->
+    <div class="flex items-center gap-4">
+      <div class="text-right hidden sm:block">
+        <div class="text-gray-600 text-xs tracking-wider">LEVEL</div>
+        <div id="hdrLevel" class="font-orb text-2xl font-bold text-purple-400 glow-purple leading-none">01</div>
+      </div>
+      <div class="w-28">
+        <div class="flex justify-between text-xs text-gray-600 mb-1">
+          <span>XP</span><span><span id="hdrXP">0</span>/<span id="hdrXPNext">100</span></span>
+        </div>
+        <div class="bg-gray-800 rounded-full h-2 overflow-hidden">
+          <div id="hdrXPBar" class="xp-bar h-full rounded-full" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY -->
+  <main class="flex-1 relative z-10 container mx-auto px-4 py-6 max-w-6xl">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+      <!-- ── COL 1: Timer + Controls ── -->
+      <div class="space-y-5">
+
+        <!-- Timer card -->
+        <div class="bg-gray-950/80 border border-gray-800 rounded-2xl p-5 box-glow-pink">
+          <div class="font-orb text-xs text-pink-400 tracking-widest mb-4">SESSION TIMER</div>
+
+          <!-- Ring -->
+          <div class="flex justify-center mb-5">
+            <div class="relative w-44 h-44">
+              <svg class="timer-svg w-full h-full" viewBox="0 0 180 180">
+                <defs>
+                  <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#ff2d78"/>
+                    <stop offset="100%" stop-color="#9d00ff"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="90" cy="90" r="78" fill="none" stroke="#1a1a2e" stroke-width="10"/>
+                <circle id="timerRing" class="progress" cx="90" cy="90" r="78"
+                  fill="none" stroke="url(#ringGrad)" stroke-width="10"
+                  stroke-dasharray="490.09" stroke-dashoffset="0"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <div id="timerDisplay" class="font-orb text-3xl font-bold">10:00</div>
+                <div id="timerStatus" class="text-gray-600 text-xs tracking-wider mt-1">READY</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Duration presets -->
+          <div id="durationPanel">
+            <div class="text-xs text-gray-600 mb-2 tracking-wider">セッション時間</div>
+            <div class="grid grid-cols-4 gap-2 mb-2">
+              <button onclick="setDuration(5)"  data-d="5"  class="dur-btn btn-outline py-2 rounded-lg text-sm">5分</button>
+              <button onclick="setDuration(10)" data-d="10" class="dur-btn btn-outline py-2 rounded-lg text-sm active">10分</button>
+              <button onclick="setDuration(15)" data-d="15" class="dur-btn btn-outline py-2 rounded-lg text-sm">15分</button>
+              <button onclick="setDuration(20)" data-d="20" class="dur-btn btn-outline py-2 rounded-lg text-sm">20分</button>
+            </div>
+            <div class="flex gap-2">
+              <input id="customDur" type="number" min="1" max="120" placeholder="カスタム (分)"
+                class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-center focus:border-pink-500 focus:outline-none">
+              <button onclick="applyCustomDur()" class="btn-outline px-3 py-2 rounded-lg text-sm">SET</button>
+            </div>
+          </div>
+
+          <!-- Control buttons -->
+          <div class="grid grid-cols-3 gap-2 mt-4">
+            <button id="btnStart" onclick="startSession()" class="btn-grad col-span-2 py-3 rounded-xl font-orb font-bold text-sm tracking-wider">
+              ▶ スタート
+            </button>
+            <button id="btnPause" onclick="pauseSession()" disabled
+              class="btn-outline py-3 rounded-xl font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed">⏸</button>
+          </div>
+          <button id="btnStop" onclick="stopSession()" disabled
+            class="mt-2 w-full bg-red-950 hover:bg-red-900 border border-red-900 py-2 rounded-xl text-red-400 text-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+            ■ セッション終了
+          </button>
+        </div>
+
+        <!-- Metronome -->
+        <div class="bg-gray-950/80 border border-gray-800 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="font-orb text-xs text-cyan-400 tracking-widest">METRONOME</div>
+            <button id="btnMetronome" onclick="toggleMetronome()"
+              class="btn-outline px-3 py-1 rounded-lg text-xs font-orb tracking-wider">
+              🥁 OFF
+            </button>
+          </div>
+          <div id="metronomePatternList" class="space-y-1 mb-2"></div>
+          <button onclick="addMetronomePattern()"
+            class="w-full text-xs text-gray-600 hover:text-cyan-400 border border-dashed border-gray-800 hover:border-cyan-800 rounded-lg py-1 transition-all mb-2">
+            ＋ パターン追加
+          </button>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-xs text-gray-600">変化間隔</span>
+            <input id="metronomeChangeInterval" type="number" min="1" max="300" value="8"
+              onchange="metronomeState.changeInterval=parseInt(this.value)||8"
+              class="w-14 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-center focus:border-cyan-500 focus:outline-none">
+            <span class="text-xs text-gray-600">秒ごとにランダム変化</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="text-xs text-gray-600">音量</div>
+            <input id="metronomeVol" type="range" min="0" max="100" value="50"
+              oninput="metronomeState.vol=this.value/100"
+              class="w-28" style="accent-color:#00f5ff;">
+            <div class="flex items-center gap-2">
+              <span id="metronomeBpmLabel" class="text-xs text-cyan-400 font-bold font-orb">-- BPM</span>
+              <div id="metronomeBeat" class="font-orb text-lg text-cyan-400 w-6 text-right">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- hidden stats to avoid JS errors -->
+        <div class="hidden">
+          <div id="btnSuccess"></div>
+          <div id="statSuccess"></div><div id="statStreak"></div>
+        </div>
+      </div>
+
+      <!-- hidden elements to avoid JS errors -->
+      <div class="hidden">
+        <div id="challengeCard"></div><div id="challengeIcon"></div>
+        <div id="challengeText"></div><div id="challengeSubtext"></div>
+        <div id="challengeCD"></div><div id="msgText"></div>
+        <div id="challengeLog"></div><div id="nextChallengeLabel"></div>
+        <div id="nextChallengeBar"></div>
+        <input id="rateSlider"><div id="rateLabel"></div>
+        <div id="statChallenges"></div>
+        <div id="fsChalCard"></div><div id="fsChalIcon"></div>
+        <div id="fsChalText"></div><div id="fsChalSub"></div>
+        <div id="fsChalCD"></div>
+        <div id="fsStatChal"></div>
+        <div id="fsNextBar"></div><div id="fsNextLabel"></div>
+        <div id="fsMsgText"></div>
+      </div>
+
+      <!-- ── COL 2: Visual Inspiration ── -->
+      <div class="space-y-5">
+
+        <!-- Inspiration panel -->
+        <div class="bg-gray-950/80 border border-gray-800 rounded-2xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <div class="font-orb text-xs text-pink-400 tracking-widest">VISUAL INSPIRATION</div>
+            <button onclick="loadRandom()" class="btn-grad px-3 py-1 rounded-lg text-xs font-orb tracking-wider">
+              🎲 ランダム
+            </button>
+          </div>
+
+          <!-- iframe embed -->
+          <div id="inspWrapper" class="relative bg-gray-900 rounded-xl overflow-hidden" style="aspect-ratio:16/9;">
+            <iframe id="inspFrame" src="about:blank" class="w-full h-full border-0"
+              allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+            <div id="inspPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-700 pointer-events-none">
+              <div class="text-4xl mb-2">🎬</div>
+              <div class="text-sm text-center px-4">「ランダム」ボタンを押すか<br>URLを入力してください</div>
+            </div>
+            <!-- Overlay text layer -->
+            <div id="overlayLayer" class="absolute inset-0 pointer-events-none"></div>
+          </div>
+
+          <!-- Overlay controls -->
+          <div class="flex items-center gap-2 mt-2">
+            <button id="btnOverlayToggle" onclick="toggleOverlay()"
+              class="btn-outline flex-1 py-1.5 rounded-lg text-xs font-orb tracking-wider">
+              💬 オーバーレイ OFF
+            </button>
+            <div class="flex items-center gap-1 text-xs text-gray-600">
+              <span>間隔</span>
+              <input id="overlayRate" type="number" min="2" max="30" value="5"
+                class="w-12 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-center text-xs focus:border-pink-500 focus:outline-none"
+                onchange="updateOverlayRate(this.value)">
+              <span>秒</span>
+            </div>
+            <button onclick="openOverlaySettings()"
+              class="btn-outline px-2 py-1.5 rounded-lg text-xs">⚙</button>
+          </div>
+
+          <!-- Quick overlay text add + list -->
+          <div class="mt-2 border-t border-gray-800 pt-2">
+            <div class="flex items-center justify-between mb-1">
+              <div class="text-xs text-pink-400 font-orb tracking-wider">💬 オーバーレイテキスト</div>
+              <button onclick="toggleQuickTextList()" class="text-xs text-gray-600 hover:text-gray-300 transition-all" id="btnToggleTextList">▼ 一覧</button>
+            </div>
+            <div class="flex gap-2 mb-1">
+              <textarea id="quickOverlayText" placeholder="テキストを入力...&#10;複数行まとめて追加OK"
+                class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-2 py-1.5 text-xs focus:border-pink-500 focus:outline-none resize-none"
+                rows="2"></textarea>
+              <button onclick="quickAddOverlayText()" class="btn-grad px-3 rounded-lg text-xs font-bold self-stretch">追加</button>
+            </div>
+            <!-- テキスト一覧 -->
+            <div id="quickTextList" class="hidden bg-gray-900 border border-gray-800 rounded-lg p-2 max-h-40 overflow-y-auto space-y-1">
+              <div id="quickTextListInner" class="space-y-1"></div>
+              <button onclick="resetOverlayTexts();renderQuickTextList()" class="w-full text-xs text-gray-600 hover:text-gray-400 mt-1 transition-all">↺ デフォルトに戻す</button>
+            </div>
+            <div id="quickOverlayCount" class="text-xs text-gray-700 mt-1 text-center"></div>
+          </div>
+
+          <!-- YouTube Search -->
+          <div class="mt-3 border-t border-gray-800 pt-3">
+            <div class="text-xs text-pink-400 font-orb tracking-wider mb-2">🔍 YouTube ショート検索</div>
+            <div class="flex gap-2 mb-2">
+              <input id="ytApiKeyInput" type="password" placeholder="YouTube APIキーを入力..."
+                class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-yellow-500 focus:outline-none"
+                onkeydown="if(event.key==='Enter') saveApiKeyFromInput()">
+              <button onclick="saveApiKeyFromInput()" class="bg-yellow-950 hover:bg-yellow-900 border border-yellow-800 px-3 py-2 rounded-lg text-xs text-yellow-400 font-bold whitespace-nowrap transition-all">保存</button>
+            </div>
+            <div id="apiKeyStatus" class="text-xs mb-2"></div>
+            <div class="flex gap-2 mb-2">
+              <input id="ytSearchInput" type="text" placeholder="キーワードを入力..."
+                class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-pink-500 focus:outline-none"
+                onkeydown="if(event.key==='Enter') searchYouTube()">
+              <button onclick="searchYouTube()" class="btn-grad px-3 py-2 rounded-lg text-xs font-bold whitespace-nowrap">検索</button>
+            </div>
+            <div id="ytSearchHistoryWrap" class="mb-2 hidden">
+              <div class="text-xs text-gray-700 mb-1">履歴</div>
+              <div id="ytSearchHistory" class="flex flex-wrap gap-1"></div>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="nextYouTubeResult()" id="btnNextVideo" disabled
+                class="flex-1 btn-outline py-2 rounded-lg text-xs disabled:opacity-30 disabled:cursor-not-allowed">
+                ▶ 次の動画
+              </button>
+              <button onclick="randomYouTubeResult()" id="btnRandVideo" disabled
+                class="flex-1 btn-outline py-2 rounded-lg text-xs disabled:opacity-30 disabled:cursor-not-allowed">
+                🎲 ランダム
+              </button>
+            </div>
+            <div id="ytStatus" class="text-xs text-gray-700 mt-2 text-center"></div>
+            <!-- Auto advance -->
+            <div class="flex items-center gap-2 mt-2">
+              <button id="btnAutoPlay" onclick="toggleAutoPlay()"
+                class="btn-grad flex-1 py-1.5 rounded-lg text-xs font-orb tracking-wider disabled:opacity-30 disabled:cursor-not-allowed" disabled>
+                🔄 自動再生 ON
+              </button>
+              <div class="flex items-center gap-1 text-xs text-gray-600">
+                <input id="autoPlaySec" type="number" min="10" max="300" value="60"
+                  class="w-12 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-center text-xs focus:border-pink-500 focus:outline-none">
+                <span>秒</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Custom URL input -->
+          <div class="mt-3 border-t border-gray-800 pt-3">
+            <div class="text-xs text-gray-600 mb-1">URL を直接入力（YouTube URL 自動変換対応）</div>
+            <div class="flex gap-2">
+              <input id="customUrlInput" type="text" placeholder="https://www.youtube.com/watch?v=..."
+                class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-pink-500 focus:outline-none"
+                onkeydown="if(event.key==='Enter') loadCustomUrl()">
+              <button onclick="loadCustomUrl()" class="btn-grad px-3 py-2 rounded-lg text-xs font-bold">▶ 再生</button>
+            </div>
+            <div id="urlConvertHint" class="text-xs text-gray-700 mt-1 hidden"></div>
+          </div>
+        </div>
+
+        <!-- URL Library -->
+        <div class="bg-gray-950/80 border border-gray-800 rounded-2xl p-4">
+          <div class="font-orb text-xs text-purple-400 tracking-widest mb-2">URL LIBRARY</div>
+          <div class="text-xs text-gray-700 mb-3">クリックで読み込み • ✕で削除</div>
+          <div id="urlLibraryList" class="space-y-1 max-h-44 overflow-y-auto pr-1"></div>
+          <div class="flex gap-2 mt-3">
+            <input id="newUrlInput" type="text" placeholder="URL を追加..."
+              class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-purple-500 focus:outline-none">
+            <button onclick="addUrl()" class="bg-purple-950 hover:bg-purple-900 border border-purple-800 px-3 py-2 rounded-lg text-xs transition-all">
+              ＋追加
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /grid -->
+  </main>
+
+  <!-- Floating messages container (settings view) -->
+  <div id="floatRoot" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+</div><!-- /mainApp -->
+
+<!-- ══════════════════════════════════════
+     FULLSCREEN SESSION OVERLAY
+════════════════════════════════════════ -->
+<div id="fsSession" class="hidden fixed inset-0 bg-black overflow-hidden" style="z-index:200; pointer-events:none;">
+
+  <!-- Background: video fills entire screen (z-index:1 で上のUIに負ける) -->
+  <iframe id="fsFrame" src="about:blank" class="absolute inset-0 w-full h-full border-0"
+    style="z-index:1; pointer-events:none;"
+    allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>
+
+  <!-- Gradient masks for readability -->
+  <div class="absolute inset-x-0 top-0 pointer-events-none" style="height:140px; z-index:2; background:linear-gradient(to bottom,rgba(0,0,0,0.75),transparent);"></div>
+  <div class="absolute inset-x-0 bottom-0 pointer-events-none" style="height:200px; z-index:2; background:linear-gradient(to top,rgba(0,0,0,0.85),transparent);"></div>
+
+  <!-- ── TOP BAR ── -->
+  <div class="absolute top-0 inset-x-0 flex items-center justify-between px-5 py-4" style="z-index:50; pointer-events:auto; padding-top:max(1rem, env(safe-area-inset-top))">
+    <!-- Exit -->
+    <button onclick="exitFsMode()"
+      class="bg-black/50 hover:bg-black/80 border border-gray-700 px-3 py-1.5 rounded-lg text-xs text-gray-300 backdrop-blur-sm transition-all">
+      ✕ 設定に戻る
+    </button>
+
+    <!-- Timer -->
+    <div class="text-center">
+      <div id="fsTimerDisplay" class="font-orb text-3xl font-bold text-white" style="text-shadow:0 0 20px rgba(255,45,120,0.8);">00:00</div>
+      <div id="fsTimerStatus" class="text-xs text-gray-400 tracking-wider">READY</div>
+    </div>
+
+    <!-- Level + XP -->
+    <div class="text-right">
+      <div class="flex items-center gap-2 justify-end">
+        <div class="text-xs text-gray-500">LV</div>
+        <div id="fsLevel" class="font-orb text-xl font-bold text-purple-400" style="text-shadow:0 0 10px #9d00ff;">01</div>
+      </div>
+      <div class="bg-gray-800/60 rounded-full h-1.5 w-24 overflow-hidden mt-1">
+        <div id="fsXPBar" class="xp-bar h-full rounded-full" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── OVERLAY TEXT LAYER ── -->
+  <div id="fsOverlayLayer" class="absolute inset-0 pointer-events-none" style="z-index:35;"></div>
+
+  <!-- ── FLOAT MESSAGES (fullscreen) ── -->
+  <div id="fsFloatRoot" class="absolute inset-0 pointer-events-none overflow-hidden" style="z-index:40;"></div>
+
+  <!-- ── BOTTOM BAR ── -->
+  <div class="absolute bottom-0 inset-x-0 px-5" style="z-index:50; pointer-events:auto; padding-bottom:max(1.5rem, env(safe-area-inset-bottom))">
+
+    <!-- Control buttons -->
+    <div class="flex gap-3 justify-center mb-4">
+      <button id="fsBtnPause" onclick="pauseSession()"
+        class="bg-black/50 border border-gray-600 px-4 py-3 rounded-xl text-xl backdrop-blur-sm hover:border-pink-500 transition-all">
+        ⏸
+      </button>
+      <button onclick="exitFsMode()"
+        class="bg-red-950/70 border border-red-900 px-4 py-3 rounded-xl text-red-400 text-sm backdrop-blur-sm hover:bg-red-900/70 transition-all">
+        ■ 終了
+      </button>
+    </div>
+    <!-- hidden to avoid JS errors -->
+    <div class="hidden">
+      <div id="fsBtnSuccess"></div>
+      <div id="fsStatSuccess"></div><div id="fsStatStreak"></div>
+    </div>
+  </div>
+
+</div><!-- /fsSession -->
+
+<!-- FS専用: iframeの外に置くことでクリックを確実に受け取るボタン -->
+<button id="fsExitBtnFixed" onclick="exitFsMode()" class="hidden"
+  style="position:fixed; top:max(14px, env(safe-area-inset-top)); left:max(14px, env(safe-area-inset-left)); z-index:9999;
+         background:rgba(0,0,0,0.7); border:1px solid rgba(255,45,120,0.5);
+         color:#fff; font-size:0.75rem; padding:8px 16px; border-radius:8px;
+         cursor:pointer; backdrop-filter:blur(6px); transition:all 0.2s;"
+  onmouseover="this.style.background='rgba(255,45,120,0.3)'"
+  onmouseout="this.style.background='rgba(0,0,0,0.7)'">
+  ✕ 設定に戻る
+</button>
+
+<!-- ══════════════════════════════════════
+     OVERLAY SETTINGS MODAL
+════════════════════════════════════════ -->
+<div id="overlaySettingsModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center p-4">
+  <div class="bg-gray-950 border border-pink-900 rounded-2xl p-6 w-full max-w-md slide-up box-glow-pink">
+    <div class="flex items-center justify-between mb-4">
+      <div class="font-orb text-sm text-pink-400 tracking-widest">OVERLAY TEXT 設定</div>
+      <button onclick="closeOverlaySettings()" class="text-gray-600 hover:text-white text-lg leading-none">✕</button>
+    </div>
+
+    <!-- Font size -->
+    <div class="mb-4">
+      <div class="text-xs text-gray-600 mb-2 tracking-wider">文字サイズ（位置はランダム自動）</div>
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="setOverlaySize('sm')" data-sz="sm" class="sz-btn btn-outline py-2 rounded-lg text-xs">小</button>
+        <button onclick="setOverlaySize('md')" data-sz="md" class="sz-btn btn-outline py-2 rounded-lg text-xs active btn-grad">中</button>
+        <button onclick="setOverlaySize('lg')" data-sz="lg" class="sz-btn btn-outline py-2 rounded-lg text-xs">大</button>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-800 mb-4"></div>
+
+    <!-- Text list -->
+    <div class="text-xs text-gray-500 mb-2 tracking-wider">テキストリスト <span class="text-gray-700">（クリックで削除）</span></div>
+    <div id="overlayTextList" class="space-y-1 pr-1 mb-3"></div>
+
+    <!-- Add new text - textarea で複数行一括追加 -->
+    <div class="text-xs text-gray-600 mb-1">1行につき1テキスト、複数行まとめて追加できます</div>
+    <div class="flex gap-2">
+      <textarea id="newOverlayText" placeholder="テキストを入力...&#10;複数行OK&#10;まとめて追加できます"
+        class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-pink-500 focus:outline-none resize-none"
+        rows="3"></textarea>
+      <button onclick="addOverlayText()" class="btn-grad px-4 py-3 rounded-lg text-sm font-bold self-stretch">一括<br>追加</button>
+    </div>
+
+    <div class="flex gap-2 mt-3">
+      <button onclick="resetOverlayTexts()" class="flex-1 bg-gray-900 border border-gray-800 py-2 rounded-lg text-xs text-gray-500 hover:text-gray-300 transition-all">
+        デフォルトに戻す
+      </button>
+      <button onclick="closeOverlaySettings()" class="flex-1 btn-grad py-2 rounded-lg text-sm font-bold">
+        完了
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     LEVEL UP MODAL
+════════════════════════════════════════ -->
+<div id="levelUpModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center p-4">
+  <div class="bg-gray-950 border border-purple-600 rounded-2xl p-8 text-center max-w-xs w-full slide-up box-glow-purple">
+    <div class="text-5xl mb-3">🏆</div>
+    <div class="font-orb text-purple-400 text-xs tracking-widest mb-1">LEVEL UP!</div>
+    <div id="luNumber" class="font-orb text-7xl font-black glow-purple mb-3">02</div>
+    <div id="luMsg" class="text-gray-300 text-sm mb-6">難易度が上昇しました！</div>
+    <button onclick="closeLevelUp()" class="btn-grad px-8 py-3 rounded-xl font-orb font-bold tracking-wider">
+      続ける ▶
+    </button>
+  </div>
+</div>
+
+<!-- SESSION COMPLETE MODAL -->
+<div id="completeModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center p-4">
+  <div class="bg-gray-950 border border-cyan-700 rounded-2xl p-8 text-center max-w-xs w-full slide-up">
+    <div class="text-5xl mb-3">✨</div>
+    <div class="font-orb text-cyan-400 text-xs tracking-widest mb-2 glow-cyan">SESSION COMPLETE</div>
+    <div class="font-orb text-4xl font-black text-white mb-4">お疲れ様！</div>
+    <div class="grid grid-cols-3 gap-3 mb-6 text-center">
+      <div><div id="cmChallenges" class="font-orb text-2xl text-cyan-400">0</div><div class="text-xs text-gray-600">チャレンジ</div></div>
+      <div><div id="cmSuccess"    class="font-orb text-2xl text-green-400">0</div><div class="text-xs text-gray-600">成功</div></div>
+      <div><div id="cmLevel"      class="font-orb text-2xl text-purple-400">1</div><div class="text-xs text-gray-600">レベル</div></div>
+    </div>
+    <button onclick="closeComplete()" class="btn-grad px-8 py-3 rounded-xl font-orb font-bold tracking-wider">
+      リセット ▶
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════ -->
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// URL LIBRARY
+// 下の入力欄からURLを追加してください
+// YouTube の通常URL（watch?v=...）も自動変換されます
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let urlLibrary = [
+  // URLを追加するには下の入力欄を使ってください
+  // 例: { label: "タイトル", url: "https://www.youtube.com/embed/VIDEO_ID" }
+];
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CHALLENGE DATA (レベル別)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const CHALLENGES = {
+  1: [
+    { icon:"🐌", text:"ゆっくりと動かして...",  sub:"できる限りゆっくりと、リズムを保って", dur:30, type:"slow" },
+    { icon:"✋", text:"一時停止！",               sub:"完全に止まって感覚を感じて",           dur:15, type:"stop" },
+    { icon:"😤", text:"深呼吸して集中",           sub:"3回ゆっくり深呼吸してリセット",        dur:20, type:"breathe" },
+    { icon:"🌊", text:"波のリズムで",             sub:"ゆっくり上げてゆっくり下げて...",      dur:25, type:"wave" },
+  ],
+  2: [
+    { icon:"🐌", text:"超スローモーション...",    sub:"ほぼ動かないくらいゆっくり",           dur:25, type:"slow" },
+    { icon:"✋", text:"10秒停止！",               sub:"10...9...8...止まれる？",             dur:10, type:"stop", cd:10 },
+    { icon:"🔄", text:"リズムを変えて",           sub:"パターンをシャッフル！",               dur:20, type:"change" },
+    { icon:"🎯", text:"このペースを維持",         sub:"ぶれずに一定のリズムで続けて",        dur:30, type:"maintain" },
+  ],
+  3: [
+    { icon:"⚡", text:"少し速く！",               sub:"ペースを一段上げてみて",              dur:20, type:"fast" },
+    { icon:"✋", text:"15秒で停止！",             sub:"限界を感じたら即停止",                dur:15, type:"stop", cd:15 },
+    { icon:"🌊", text:"波を作れ",                 sub:"遅→速→停止→繰り返し",               dur:30, type:"wave" },
+    { icon:"🎭", text:"3カウントで切替",          sub:"3拍ごとに速度を変えて",              dur:25, type:"pattern" },
+  ],
+  4: [
+    { icon:"⚡", text:"速度アップ！",             sub:"もっと早く！でも止まれる準備を",     dur:20, type:"fast" },
+    { icon:"✋", text:"ぎりぎりで停止",          sub:"限界の直前でぴたりと止まれ",         dur:10, type:"stop", cd:10, urgent:true },
+    { icon:"🔥", text:"強度 UP！",               sub:"強度を上げてキープ！",               dur:20, type:"intense" },
+    { icon:"💫", text:"速→遅",                   sub:"全力から急にスローへ",               dur:25, type:"spin" },
+  ],
+  5: [
+    { icon:"🚀", text:"全速力で！",               sub:"限界まで速く！でも止まれ",           dur:15, type:"max" },
+    { icon:"✋", text:"5秒で停止！今すぐ！",      sub:"5...4...3...2...1...STOP!",         dur:5,  type:"stop", cd:5, urgent:true },
+    { icon:"🔥", text:"MAXインテンシティ！",      sub:"最大強度！コントロールを失うな",     dur:15, type:"max" },
+    { icon:"⏱", text:"20秒カウントダウン",       sub:"全力で 20 秒！",                    dur:20, type:"countdown", cd:20 },
+  ],
+  6: [
+    { icon:"🔥", text:"EDGE 境界線！",            sub:"限界に達したら即停止！",             dur:12, type:"edge", urgent:true },
+    { icon:"⚡", text:"インターバル",             sub:"10秒全力→5秒停止→繰り返し",        dur:30, type:"interval" },
+    { icon:"✋", text:"3秒で停止！",              sub:"3...2...1...NOW!",                  dur:3,  type:"stop", cd:3, urgent:true },
+    { icon:"🌊", text:"マスターウェーブ",         sub:"完璧な波のコントロールを見せて",    dur:25, type:"wave" },
+  ],
+  7: [
+    { icon:"🏆", text:"EDGE MASTER 挑戦",         sub:"限界の 0.1 秒前で止まれ",           dur:10, type:"edge", urgent:true },
+    { icon:"⚡", text:"ランダム停止",             sub:"次の指示まで全力！即停止の準備",     dur:20, type:"random", urgent:true },
+    { icon:"🔥", text:"DANGER ZONE",              sub:"危険ゾーン...コントロールできるか？",dur:15, type:"danger", urgent:true },
+    { icon:"💎", text:"完璧なコントロール",       sub:"神経を研ぎ澄まして制御",            dur:30, type:"control" },
+  ],
+  8: [
+    { icon:"🔥", text:"MAX POWER!",               sub:"最大出力！でも止まれ！",            dur:10, type:"max", urgent:true },
+    { icon:"⏱", text:"10秒 MAX→停止",            sub:"全力 10 秒後にぴたりと止まれ",     dur:10, type:"stop", cd:10, urgent:true },
+    { icon:"🌀", text:"エクストリームウェーブ",   sub:"ランダムな速度変化に瞬時に従え",   dur:20, type:"extreme", urgent:true },
+    { icon:"✋", text:"即時停止！",               sub:"今この瞬間！",                      dur:5,  type:"stop", cd:5, urgent:true },
+  ],
+  9: [
+    { icon:"💀", text:"ABSOLUTE EDGE",            sub:"絶対的な限界...止まれるか？",        dur:10, type:"edge", urgent:true },
+    { icon:"🔥", text:"フルインテンシティ",       sub:"完全なる強度で...制御せよ",         dur:15, type:"max", urgent:true },
+    { icon:"⚡", text:"シームレス切替",           sub:"指示なしに速度を自在に操れ",        dur:25, type:"seamless" },
+    { icon:"✋", text:"2秒で停止！",              sub:"2...1...NOW!",                      dur:2,  type:"stop", cd:2, urgent:true },
+  ],
+  10: [
+    { icon:"👑", text:"EDGE MASTER",              sub:"真のマスター。完璧に制御せよ",      dur:30, type:"master" },
+    { icon:"💀", text:"ULTIMATE EDGE",            sub:"究極の限界...制御できるか？",       dur:10, type:"edge", urgent:true },
+    { icon:"🔥", text:"GOD MODE",                 sub:"神の領域のコントロール",            dur:20, type:"max", urgent:true },
+    { icon:"🏆", text:"PERFECT CONTROL",          sub:"完璧なるコントロール...あなたが主人",dur:25, type:"control" },
+  ],
+};
+
+// メッセージプール
+const MSGS = {
+  idle:    ["準備完了...", "セッションを開始してください", "あなたの挑戦を待っています", "いつでも始めて...", "集中して..."],
+  start:   ["セッション開始！集中して！", "準備はいい？始めよう！", "チャレンジを楽しんで！", "あなたならできる！", "コントロールを保って！"],
+  next:    ["次のチャレンジが来たよ！", "集中して！", "指示に従って！", "コントロールを保って！", "限界を試して！"],
+  stop:    ["止まれ！今すぐ！", "STOP! STOP! STOP!", "停止！コントロールして！", "今すぐ止まれ！", "ぴたりと止まれ！"],
+  edge:    ["ぎりぎり...頑張れ！", "限界に近い...コントロールして！", "エッジにいる！止まれるか？", "崩れるな！"],
+  success: ["完璧！素晴らしい！", "やった！コントロール最高！", "素晴らしいコントロール！", "その調子！", "マスターに近づいている！"],
+  levelUp: ["レベルアップ！より難しくなるよ！", "スゴい！次のレベルへ！", "本物のマスターだ！", "新しいレベルに到達！"],
+  ambient: [
+    "コントロールこそ快楽...", "あなたが主人だ", "ゆっくりと...感じて",
+    "集中。呼吸。感じる。", "限界の手前で止まれ", "完璧なコントロール",
+    "あなたの体を制御せよ", "強くなれ", "リズムを感じて...", "意識を高めて！",
+    "限界に近づいてる？", "頑張れ！", "深呼吸...",
+  ],
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// STATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const S = {
+  running: false,
+  paused:  false,
+  sessionSec: 600,
+  remaining:  600,
+  level: 1,
+  xp: 0,
+  xpNext: 100,
+  challenges: 0,
+  successes:  0,
+  streak:     0,
+  rate: 20,          // seconds between challenges
+  sessionTick:   null,
+  nextChalTick:  null,
+  nextChalAt:    0,  // timestamp
+  cdTick:        null,
+  ambientTick:   null,
+  ncBarTick:     null,
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AGE GATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function enterApp() {
+  document.getElementById('ageGate').classList.add('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  initParticles();
+  renderUrlLibrary();
+  renderYtHistory();
+  renderMetronomePatterns();
+  updateApiKeyStatus();
+  setDuration(10);
+  startAmbient();
+  renderQuickTextList();
+}
+function denyEntry() {
+  document.getElementById('ageGate').classList.add('hidden');
+  document.getElementById('underageMsg').classList.remove('hidden');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PARTICLES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function initParticles() {
+  const root = document.getElementById('particlesRoot');
+  const colors = ['#ff2d78','#9d00ff','#00f5ff','#ff6b9d','#c060ff'];
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    const size = Math.random() * 3 + 1;
+    p.className = 'particle';
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      background:${colors[i % colors.length]};
+      left:${Math.random()*100}%;
+      animation-duration:${Math.random()*20+12}s;
+      animation-delay:${Math.random()*15}s;
+      opacity:0.25;
+      filter:blur(${size > 2 ? 1 : 0}px);
+    `;
+    root.appendChild(p);
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// TIMER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function setDuration(m) {
+  S.sessionSec = m * 60;
+  S.remaining  = m * 60;
+  renderTimerDisplay();
+  document.querySelectorAll('.dur-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.d) === m);
+    b.classList.toggle('btn-grad', parseInt(b.dataset.d) === m);
+    b.classList.toggle('btn-outline', parseInt(b.dataset.d) !== m);
+  });
+  document.getElementById('customDur').value = '';
+}
+function applyCustomDur() {
+  const v = parseInt(document.getElementById('customDur').value);
+  if (v >= 1 && v <= 120) setDuration(v);
+}
+function updateRate(v) {
+  S.rate = parseInt(v);
+  document.getElementById('rateLabel').textContent = v + '秒間隔';
+}
+
+function renderTimerDisplay() {
+  const m = Math.floor(S.remaining / 60);
+  const s = S.remaining % 60;
+  const txt = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  document.getElementById('timerDisplay').textContent = txt;
+  document.getElementById('fsTimerDisplay').textContent = txt;
+
+  const CIRC = 490.09;
+  const ratio = S.sessionSec > 0 ? S.remaining / S.sessionSec : 0;
+  document.getElementById('timerRing').style.strokeDashoffset = CIRC * (1 - ratio);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SESSION CONTROL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function startSession() {
+  if (S.running && !S.paused) return;
+
+  S.running = true;
+  S.paused  = false;
+  setControlState('running');
+  document.getElementById('timerStatus').textContent = 'RUNNING';
+  document.getElementById('durationPanel').style.opacity = '0.4';
+  document.getElementById('durationPanel').style.pointerEvents = 'none';
+
+  if (!S.sessionTick) {
+    S.sessionTick = setInterval(() => {
+      if (!S.paused) {
+        S.remaining--;
+        renderTimerDisplay();
+        if (S.remaining <= 0) endSession();
+      }
+    }, 1000);
+  }
+
+  scheduleNextChallenge();
+  showMsg(rand(MSGS.start), 'pink');
+  stopAmbient();
+  if (metronomeState.enabled) startMetronome();
+  enterFsMode();
+}
+
+function enterFsMode() {
+  // 先にfsSessionを表示（isFullscreen()がtrueになる）
+  document.getElementById('fsSession').classList.remove('hidden');
+  document.getElementById('fsExitBtnFixed').classList.remove('hidden');
+  document.getElementById('inspFrame').src = 'about:blank';
+
+  // 動画: currentVideoUrl があればそれを使う、なければYouTube検索結果から自動再生
+  if (currentVideoUrl && currentVideoUrl !== 'about:blank') {
+    document.getElementById('fsFrame').src = currentVideoUrl;
+  } else if (ytState.results.length) {
+    ytState.index = 0;
+    playYtVideo(ytState.results[0]);
+  }
+  document.getElementById('fsTimerStatus').textContent = 'RUNNING';
+  renderTimerDisplay();
+  syncFsStats();
+
+  // オーバーレイが無効なら自動でONにする
+  if (!overlayState.enabled && overlayTexts.length) {
+    toggleOverlay();
+  }
+
+  // 動画の自動送りを有効化（検索結果がある場合）
+  if (ytState.results.length && !ytAutoState.enabled) {
+    ytAutoState.enabled = true;
+    const btn = document.getElementById('btnAutoPlay');
+    if (btn) { btn.textContent = '🔄 自動再生 ON'; btn.classList.replace('btn-outline','btn-grad'); }
+    restartAutoTimer();
+  }
+
+  setTimeout(() => floatMsg('🔥 セッション開始！', '#ff2d78', 180), 200);
+}
+
+function exitFsMode() {
+  // fsFrameを空にしてからinspFrameに動画を戻す
+  document.getElementById('fsFrame').src = 'about:blank';
+  if (currentVideoUrl && currentVideoUrl !== 'about:blank') {
+    document.getElementById('inspFrame').src = currentVideoUrl;
+    document.getElementById('inspPlaceholder').classList.add('hidden');
+  }
+  document.getElementById('fsSession').classList.add('hidden');
+  document.getElementById('fsExitBtnFixed').classList.add('hidden');
+  document.getElementById('fsChalCard').classList.add('hidden');
+  // 自動送りを停止
+  if (ytAutoState.enabled) {
+    ytAutoState.enabled = false;
+    clearTimeout(ytAutoState.timer);
+    const btn = document.getElementById('btnAutoPlay');
+    if (btn) { btn.textContent = '🔄 自動再生 OFF'; btn.classList.replace('btn-grad','btn-outline'); }
+  }
+  stopSession();
+}
+
+function isFullscreen() {
+  return !document.getElementById('fsSession').classList.contains('hidden');
+}
+
+function syncFsStats() {
+  document.getElementById('fsStatChal').textContent    = S.challenges;
+  document.getElementById('fsStatSuccess').textContent = S.successes;
+  document.getElementById('fsStatStreak').textContent  = S.streak;
+}
+
+function pauseSession() {
+  S.paused = !S.paused;
+  if (S.paused) {
+    document.getElementById('btnPause').textContent    = '▶';
+    document.getElementById('fsBtnPause').textContent  = '▶';
+    document.getElementById('btnStart').disabled       = false;
+    document.getElementById('btnStart').textContent    = '▶ 再開';
+    document.getElementById('timerStatus').textContent   = 'PAUSED';
+    document.getElementById('fsTimerStatus').textContent = 'PAUSED';
+    clearTimeout(S.nextChalTick); S.nextChalTick = null;
+    clearInterval(S.ncBarTick);   S.ncBarTick   = null;
+    stopMetronome();
+    showMsg('⏸ 一時停止中...', 'gray');
+  } else {
+    document.getElementById('btnPause').textContent    = '⏸';
+    document.getElementById('fsBtnPause').textContent  = '⏸';
+    document.getElementById('btnStart').disabled       = true;
+    document.getElementById('btnStart').textContent    = '▶ 実行中';
+    document.getElementById('timerStatus').textContent   = 'RUNNING';
+    document.getElementById('fsTimerStatus').textContent = 'RUNNING';
+    scheduleNextChallenge();
+    if (metronomeState.enabled) startMetronome();
+    showMsg('▶ 再開！', 'pink');
+  }
+}
+
+function stopSession(silent) {
+  clearInterval(S.sessionTick); S.sessionTick = null;
+  clearTimeout(S.nextChalTick); S.nextChalTick = null;
+  clearInterval(S.cdTick); S.cdTick = null;
+  clearInterval(S.ncBarTick); S.ncBarTick = null;
+  S.running = false;
+  S.paused  = false;
+
+  setControlState('idle');
+  document.getElementById('timerStatus').textContent = 'STOPPED';
+  document.getElementById('durationPanel').style.opacity = '';
+  document.getElementById('durationPanel').style.pointerEvents = '';
+
+  resetChallengeCard();
+  startAmbient();
+  stopMetronome();
+
+  if (!silent) {
+    showMsg('セッション終了。お疲れ様！', 'gray');
+    floatMsg('✨ お疲れ様でした！', '#9d00ff', 120);
+  }
+}
+
+function endSession() {
+  const c = S.challenges, su = S.successes, lv = S.level;
+  stopSession(true);
+  addXP(50 + su * 5);
+
+  document.getElementById('cmChallenges').textContent = c;
+  document.getElementById('cmSuccess').textContent    = su;
+  document.getElementById('cmLevel').textContent      = lv;
+  document.getElementById('completeModal').classList.remove('hidden');
+}
+
+function closeComplete() {
+  document.getElementById('completeModal').classList.add('hidden');
+  // Reset session stats
+  S.challenges = 0; S.successes = 0; S.streak = 0;
+  document.getElementById('statChallenges').textContent = '0';
+  document.getElementById('statSuccess').textContent    = '0';
+  document.getElementById('statStreak').textContent     = '0';
+  S.remaining = S.sessionSec;
+  renderTimerDisplay();
+  document.getElementById('timerStatus').textContent = 'READY';
+  resetNextChallengeBar();
+}
+
+function setControlState(mode) {
+  const btnStart   = document.getElementById('btnStart');
+  const btnPause   = document.getElementById('btnPause');
+  const btnStop    = document.getElementById('btnStop');
+  const btnSuccess = document.getElementById('btnSuccess');
+
+  if (mode === 'running') {
+    btnStart.textContent = '▶ 実行中';
+    btnStart.disabled = true;
+    btnPause.disabled = false;
+    btnStop.disabled  = false;
+    btnSuccess.disabled = false;
+    btnSuccess.classList.remove('opacity-40');
+  } else {
+    btnStart.textContent = '▶ スタート';
+    btnStart.disabled = false;
+    btnPause.disabled = true;
+    btnPause.textContent = '⏸';
+    btnStop.disabled  = true;
+    btnSuccess.disabled = true;
+    btnSuccess.classList.add('opacity-40');
+  }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CHALLENGE ENGINE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function scheduleNextChallenge() {
+  if (!S.running || S.paused) return;
+  const delay = (S.rate + (Math.random() - 0.5) * 8) * 1000;
+  const safed = Math.max(8000, delay);
+  S.nextChalAt = Date.now() + safed;
+  startNextChallengeBar(safed);
+  S.nextChalTick = setTimeout(() => {
+    if (S.running && !S.paused) triggerChallenge();
+  }, safed);
+}
+
+function startNextChallengeBar(totalMs) {
+  clearInterval(S.ncBarTick);
+  document.getElementById('nextChallengeLabel').textContent = '次まで...';
+  document.getElementById('fsNextLabel').textContent = '次まで...';
+  S.ncBarTick = setInterval(() => {
+    const left = S.nextChalAt - Date.now();
+    const pct  = Math.max(0, (left / totalMs) * 100);
+    const w    = (100 - pct) + '%';
+    const secs = Math.ceil(left / 1000);
+    const lbl  = secs > 0 ? secs + '秒後' : '今すぐ！';
+    document.getElementById('nextChallengeBar').style.width = w;
+    document.getElementById('fsNextBar').style.width        = w;
+    document.getElementById('nextChallengeLabel').textContent = lbl;
+    document.getElementById('fsNextLabel').textContent        = lbl;
+    if (left <= 0) clearInterval(S.ncBarTick);
+  }, 200);
+}
+
+function resetNextChallengeBar() {
+  clearInterval(S.ncBarTick);
+  document.getElementById('nextChallengeBar').style.width = '0%';
+  document.getElementById('fsNextBar').style.width        = '0%';
+  document.getElementById('nextChallengeLabel').textContent = '待機中...';
+  document.getElementById('fsNextLabel').textContent        = '待機中...';
+}
+
+function triggerChallenge() {
+  clearInterval(S.ncBarTick);
+  document.getElementById('nextChallengeBar').style.width = '100%';
+  document.getElementById('fsNextBar').style.width        = '100%';
+
+  const lvKey = Math.min(S.level, 10).toString();
+  const pool  = CHALLENGES[lvKey] || CHALLENGES['10'];
+  const ch    = pool[Math.floor(Math.random() * pool.length)];
+
+  S.challenges++;
+  document.getElementById('statChallenges').textContent = S.challenges;
+  document.getElementById('fsStatChal').textContent     = S.challenges;
+
+  // Settings-panel card
+  const card = document.getElementById('challengeCard');
+  card.className = 'bg-gray-950/80 border border-pink-500 rounded-2xl p-6 flex flex-col items-center justify-center text-center challenge-active';
+  document.getElementById('challengeIcon').textContent = ch.icon;
+  document.getElementById('challengeText').textContent = ch.text;
+  document.getElementById('challengeText').className   =
+    ch.urgent ? 'text-pink-300 text-xl font-bold urgent-text' : 'text-white text-xl font-bold';
+  document.getElementById('challengeSubtext').textContent = ch.sub;
+
+  // Fullscreen card
+  const fsCard = document.getElementById('fsChalCard');
+  fsCard.classList.remove('hidden');
+  fsCard.style.animation = 'challengeIn 0.4s ease-out';
+  document.getElementById('fsChalIcon').textContent = ch.icon;
+  document.getElementById('fsChalText').textContent = ch.text;
+  document.getElementById('fsChalText').className   =
+    ch.urgent ? 'text-2xl font-bold urgent-text mb-1' : 'text-2xl font-bold text-white mb-1';
+  document.getElementById('fsChalSub').textContent  = ch.sub;
+
+  // Countdown (both panels)
+  const cdEl   = document.getElementById('challengeCD');
+  const fsCdEl = document.getElementById('fsChalCD');
+  if (ch.cd) {
+    cdEl.classList.remove('hidden');
+    cdEl.className = 'font-orb text-5xl font-black text-pink-400 mt-4 count-pop';
+    fsCdEl.classList.remove('hidden');
+    fsCdEl.className = 'font-orb text-6xl font-black text-pink-400 mt-4 count-pop';
+    runCountdown(ch.cd, cdEl, fsCdEl);
+  } else {
+    cdEl.classList.add('hidden');
+    fsCdEl.classList.add('hidden');
+    clearInterval(S.cdTick);
+  }
+
+  // Messages & float
+  if (ch.type === 'stop' || ch.type === 'edge') {
+    showMsg(rand(ch.type === 'stop' ? MSGS.stop : MSGS.edge), 'red');
+    floatMsg(ch.icon + ' ' + ch.text, '#ff2d78', 150 + Math.random() * 80);
+  } else {
+    showMsg(rand(MSGS.next), 'pink');
+    floatMsg(ch.icon + ' ' + ch.text, '#9d00ff', 150 + Math.random() * 80);
+  }
+
+  addToLog(ch.icon, ch.type);
+
+  // Auto-reset after duration
+  setTimeout(() => {
+    if (S.running && !S.paused) {
+      resetChallengeCard();
+      scheduleNextChallenge();
+    }
+  }, ch.dur * 1000);
+}
+
+function runCountdown(n, el, el2) {
+  clearInterval(S.cdTick);
+  let v = n;
+  el.textContent  = v;
+  if (el2) el2.textContent = v;
+  S.cdTick = setInterval(() => {
+    v--;
+    if (v <= 0) {
+      clearInterval(S.cdTick);
+      el.textContent  = '✓';
+      el.className    = 'font-orb text-5xl font-black text-green-400 mt-4';
+      if (el2) { el2.textContent = '✓'; el2.className = 'font-orb text-6xl font-black text-green-400 mt-4'; }
+    } else {
+      el.textContent  = v;
+      if (el2) el2.textContent = v;
+      if (v <= 3) {
+        el.className  = 'font-orb text-5xl font-black text-red-500 mt-4 urgent-text';
+        if (el2) el2.className = 'font-orb text-6xl font-black text-red-500 mt-4 urgent-text';
+      }
+    }
+  }, 1000);
+}
+
+function resetChallengeCard() {
+  const card = document.getElementById('challengeCard');
+  card.className = 'bg-gray-950/80 border border-gray-800 rounded-2xl p-6 flex flex-col items-center justify-center text-center';
+  document.getElementById('challengeIcon').textContent = '✦';
+  document.getElementById('challengeText').textContent = '次のチャレンジを待って...';
+  document.getElementById('challengeText').className   = 'text-gray-600 text-xl';
+  document.getElementById('challengeSubtext').textContent = '';
+  document.getElementById('challengeCD').classList.add('hidden');
+  // Fullscreen card
+  document.getElementById('fsChalCard').classList.add('hidden');
+  document.getElementById('fsChalCD').classList.add('hidden');
+  clearInterval(S.cdTick);
+  resetNextChallengeBar();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SUCCESS & LEVEL
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function recordSuccess() {
+  if (!S.running) return;
+  S.successes++;
+  S.streak++;
+  document.getElementById('statSuccess').textContent  = S.successes;
+  document.getElementById('statStreak').textContent   = S.streak;
+  document.getElementById('fsStatSuccess').textContent = S.successes;
+  document.getElementById('fsStatStreak').textContent  = S.streak;
+
+  const xpEarned = 10 + S.streak * 5 + S.level * 2;
+  addXP(xpEarned);
+
+  showMsg(rand(MSGS.success), 'green');
+  floatMsg('+' + xpEarned + ' XP! 🎯', '#00f5ff', 180 + Math.random() * 80);
+
+  // Brief flash
+  const fl = document.createElement('div');
+  fl.className = 'fixed inset-0 pointer-events-none z-30 flash-overlay';
+  document.body.appendChild(fl);
+  setTimeout(() => fl.remove(), 800);
+}
+
+function addXP(amount) {
+  S.xp += amount;
+  while (S.xp >= S.xpNext) {
+    S.xp -= S.xpNext;
+    S.xpNext = Math.floor(S.xpNext * 1.5);
+    S.level++;
+    showLevelUp();
+  }
+  updateXPUI();
+}
+
+function updateXPUI() {
+  const pct = (S.xp / S.xpNext) * 100;
+  const lv  = String(S.level).padStart(2,'0');
+  document.getElementById('hdrLevel').textContent  = lv;
+  document.getElementById('hdrXP').textContent     = S.xp;
+  document.getElementById('hdrXPNext').textContent = S.xpNext;
+  document.getElementById('hdrXPBar').style.width  = pct + '%';
+  document.getElementById('fsLevel').textContent   = lv;
+  document.getElementById('fsXPBar').style.width   = pct + '%';
+}
+
+function showLevelUp() {
+  const msgs = ['難易度が上昇しました！', 'チャレンジが激しくなる！', '真のマスターに近づいている！', '限界を超えろ！'];
+  document.getElementById('luNumber').textContent = String(S.level).padStart(2,'0');
+  document.getElementById('luMsg').textContent    = rand(msgs);
+  document.getElementById('levelUpModal').classList.remove('hidden');
+  showMsg(rand(MSGS.levelUp), 'yellow');
+  floatMsg('LEVEL UP! 🏆 Lv.' + S.level, '#ffd700', 200);
+}
+function closeLevelUp() {
+  document.getElementById('levelUpModal').classList.add('hidden');
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MESSAGES
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showMsg(text, color) {
+  const colors = {
+    red:    'text-red-400 font-bold',
+    green:  'text-green-400',
+    yellow: 'text-yellow-400 font-bold',
+    gray:   'text-gray-500 italic',
+    pink:   'text-pink-300',
+  };
+  const cls = (colors[color] || 'text-pink-300');
+
+  const el = document.getElementById('msgText');
+  el.style.opacity = '0';
+
+  const fsEl = document.getElementById('fsMsgText');
+  fsEl.style.opacity = '0';
+
+  setTimeout(() => {
+    el.textContent   = text;
+    el.style.opacity = '1';
+    el.className     = cls + ' text-center text-sm cursor';
+
+    fsEl.textContent   = text;
+    fsEl.style.opacity = '1';
+    fsEl.className     = cls + ' text-center text-base';
+  }, 280);
+}
+
+function floatMsg(text, color, bottom) {
+  // フルスクリーン中はFS用コンテナへ、それ以外は通常コンテナへ
+  const rootId = isFullscreen() ? 'fsFloatRoot' : 'floatRoot';
+  const root   = document.getElementById(rootId);
+  const el     = document.createElement('div');
+  el.className = 'float-msg';
+  el.style.cssText = `
+    color: ${color};
+    text-shadow: 0 0 10px ${color};
+    background: rgba(0,0,0,0.6);
+    border: 1px solid ${color}55;
+    bottom: ${bottom || 100}px;
+  `;
+  el.textContent = text;
+  root.appendChild(el);
+  setTimeout(() => el.remove(), 2600);
+}
+
+let ambientIdx = 0;
+function startAmbient() {
+  stopAmbient();
+  S.ambientTick = setInterval(() => {
+    if (!S.running) {
+      ambientIdx = (ambientIdx + 1) % MSGS.ambient.length;
+      showMsg(MSGS.ambient[ambientIdx], 'gray');
+    }
+  }, 4500);
+}
+function stopAmbient() {
+  clearInterval(S.ambientTick);
+  S.ambientTick = null;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CHALLENGE LOG
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function addToLog(icon, type) {
+  const log = document.getElementById('challengeLog');
+  if (log.querySelector('span')) log.innerHTML = '';
+  const typeColor = {
+    stop:    'bg-red-950 text-red-400 border-red-900',
+    edge:    'bg-purple-950 text-purple-400 border-purple-900',
+    fast:    'bg-orange-950 text-orange-400 border-orange-900',
+    max:     'bg-rose-950 text-rose-400 border-rose-900',
+    slow:    'bg-blue-950 text-blue-400 border-blue-900',
+    master:  'bg-yellow-950 text-yellow-400 border-yellow-900',
+    default: 'bg-gray-900 text-gray-500 border-gray-800',
+  };
+  const cls = typeColor[type] || typeColor.default;
+  const item = document.createElement('div');
+  item.className = `${cls} border text-xs px-2 py-1 rounded-lg`;
+  item.textContent = icon;
+  log.appendChild(item);
+  while (log.children.length > 24) log.removeChild(log.firstChild);
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// URL LIBRARY & INSPIRATION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderUrlLibrary() {
+  const list = document.getElementById('urlLibraryList');
+  list.innerHTML = '';
+  urlLibrary.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 px-2 py-1.5 bg-gray-900 rounded-lg hover:bg-gray-800 cursor-pointer group transition-all';
+    row.innerHTML = `
+      <div class="flex-1 text-xs text-gray-400 truncate" onclick="loadByIndex(${i})">${item.label}</div>
+      <button onclick="removeUrl(${i})" class="text-gray-700 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-all leading-none">✕</button>
+    `;
+    list.appendChild(row);
+  });
+}
+function loadByIndex(i) {
+  if (i < urlLibrary.length) {
+    setVideo(urlLibrary[i].url);
+    floatMsg('📺 読み込み中...', '#9d00ff', 120);
+  }
+}
+function loadRandom() {
+  if (!urlLibrary.length) { floatMsg('URLライブラリが空です', '#ff2d78', 120); return; }
+  loadByIndex(Math.floor(Math.random() * urlLibrary.length));
+  floatMsg('🎲 ランダム！', '#9d00ff', 120);
+}
+// 現在の動画URL（グローバル管理）
+let currentVideoUrl = '';
+
+// 動画をセットする唯一の関数 — 常にここを通す
+function setVideo(url) {
+  currentVideoUrl = url;
+  // フルスクリーン中ならfsFrameへ、そうでなければinspFrameへ
+  const frameId = isFullscreen() ? 'fsFrame' : 'inspFrame';
+  document.getElementById(frameId).src = url;
+  document.getElementById('inspPlaceholder').classList.add('hidden');
+}
+
+// YouTube video ID を抽出するユーティリティ
+function extractYtId(raw) {
+  const s = raw.trim();
+  // すでに embed 形式から ID を取得
+  const emb = s.match(/(?:youtube(?:-nocookie)?\.com\/embed\/)([A-Za-z0-9_-]{11})/);
+  if (emb) return emb[1];
+  // youtu.be 短縮
+  const short = s.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+  if (short) return short[1];
+  // youtube.com/watch?v=
+  const watch = s.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+  if (watch) return watch[1];
+  return null;
+}
+
+// YouTube URL → embed URL に自動変換（youtube-nocookie.com 使用）
+function toEmbedUrl(raw) {
+  const id = extractYtId(raw.trim());
+  if (id) return `https://www.youtube-nocookie.com/embed/${id}?rel=0`;
+  return raw.trim(); // YouTube以外はそのまま
+}
+
+function loadCustomUrl() {
+  const input = document.getElementById('customUrlInput');
+  const raw   = input.value.trim();
+  if (!raw) return;
+  const embed = toEmbedUrl(raw);
+  const hint  = document.getElementById('urlConvertHint');
+  if (embed !== raw) {
+    hint.textContent = '✓ YouTube URL を自動変換しました';
+    hint.classList.remove('hidden');
+    hint.style.color = '#00f5ff';
+    setTimeout(() => hint.classList.add('hidden'), 3000);
+  } else {
+    hint.classList.add('hidden');
+  }
+  setVideo(embed);
+  input.value = '';
+}
+function addUrl() {
+  const input = document.getElementById('newUrlInput');
+  const raw   = input.value.trim();
+  if (!raw) return;
+  const embed = toEmbedUrl(raw);
+  const label = (embed.includes('/embed/') ? '▶ ' : '') +
+                (raw.length > 42 ? raw.slice(0, 42) + '…' : raw);
+  urlLibrary.push({ label, url: embed });
+  renderUrlLibrary();
+  input.value = '';
+  floatMsg('＋ URL 追加！', '#00f5ff', 100);
+}
+function removeUrl(i) {
+  urlLibrary.splice(i, 1);
+  renderUrlLibrary();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// UTILS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// YOUTUBE SHORTS SEARCH
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function getYtApiKey() {
+  return localStorage.getItem('em_yt_api_key') || '';
+}
+function saveYtApiKey(key) {
+  localStorage.setItem('em_yt_api_key', key.trim());
+}
+function saveApiKeyFromInput() {
+  const val = document.getElementById('ytApiKeyInput').value.trim();
+  if (!val) return;
+  saveYtApiKey(val);
+  document.getElementById('ytApiKeyInput').value = '';
+  updateApiKeyStatus();
+}
+function updateApiKeyStatus() {
+  const el = document.getElementById('apiKeyStatus');
+  if (!el) return;
+  const key = getYtApiKey();
+  if (key) {
+    el.textContent = '✓ APIキー設定済み (' + key.slice(0,8) + '...)';
+    el.style.color = '#4ade80';
+  } else {
+    el.textContent = '⚠ APIキー未設定 — YouTube検索には必要です';
+    el.style.color = '#facc15';
+  }
+}
+
+const ytState = {
+  results: [],   // 検索結果の videoId 一覧
+  index:   0,    // 現在の再生位置
+};
+
+// ── Search history ──
+let ytSearchHistory = (() => {
+  try { return JSON.parse(localStorage.getItem('em_yt_history') || '[]'); } catch { return []; }
+})();
+
+function saveYtHistory(query) {
+  ytSearchHistory = [query, ...ytSearchHistory.filter(q => q !== query)].slice(0, 10);
+  try { localStorage.setItem('em_yt_history', JSON.stringify(ytSearchHistory)); } catch {}
+  renderYtHistory();
+}
+
+function renderYtHistory() {
+  const wrap = document.getElementById('ytSearchHistoryWrap');
+  const container = document.getElementById('ytSearchHistory');
+  if (!ytSearchHistory.length) { wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  container.innerHTML = '';
+  ytSearchHistory.forEach(q => {
+    const chip = document.createElement('button');
+    chip.textContent = q;
+    chip.className = 'px-2 py-0.5 rounded-full bg-gray-800 border border-gray-700 text-xs text-gray-400 hover:border-pink-500 hover:text-pink-400 transition-all';
+    chip.onclick = () => { document.getElementById('ytSearchInput').value = q; searchYouTube(); };
+    container.appendChild(chip);
+  });
+}
+
+async function searchYouTube() {
+  const query = document.getElementById('ytSearchInput').value.trim();
+  if (!query) return;
+
+  saveYtHistory(query);
+  setYtStatus('🔍 検索中...', '#9d00ff');
+
+  try {
+    const url = new URL('https://www.googleapis.com/youtube/v3/search');
+    url.searchParams.set('part', 'snippet');
+    url.searchParams.set('type', 'video');
+    url.searchParams.set('videoDuration', 'short');  // 4分未満（Shorts対象）
+    url.searchParams.set('videoEmbeddable', 'true'); // 埋め込み許可動画のみ
+    url.searchParams.set('maxResults', '25');
+    url.searchParams.set('q', query);
+    const apiKey = getYtApiKey();
+    if (!apiKey) { setYtStatus('❌ APIキーを設定してください', '#ff4444'); return; }
+    url.searchParams.set('key', apiKey);
+
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (data.error) {
+      setYtStatus('❌ APIエラー: ' + data.error.message, '#ff4444');
+      return;
+    }
+
+    const ids = (data.items || []).map(item => item.id.videoId).filter(Boolean);
+    if (!ids.length) {
+      setYtStatus('動画が見つかりませんでした', '#888');
+      return;
+    }
+
+    ytState.results = ids;
+    ytState.index   = 0;
+
+    // 結果をランダムに並び替えて最初の1本を再生
+    ytState.results.sort(() => Math.random() - 0.5);
+    playYtVideo(ytState.results[0]);
+
+    document.getElementById('btnNextVideo').disabled = false;
+    document.getElementById('btnRandVideo').disabled = false;
+    document.getElementById('btnAutoPlay').disabled = false;
+    setYtStatus(`✓ ${ids.length}件見つかりました`, '#00f5ff');
+
+  } catch (e) {
+    setYtStatus('❌ 通信エラー: ' + e.message, '#ff4444');
+  }
+}
+
+function nextYouTubeResult() {
+  if (!ytState.results.length) return;
+  ytState.index = (ytState.index + 1) % ytState.results.length;
+  playYtVideo(ytState.results[ytState.index]);
+  setYtStatus(`${ytState.index + 1} / ${ytState.results.length}`, '#9d00ff');
+}
+
+function randomYouTubeResult() {
+  if (!ytState.results.length) return;
+  ytState.index = Math.floor(Math.random() * ytState.results.length);
+  playYtVideo(ytState.results[ytState.index]);
+  setYtStatus(`🎲 ランダム再生 (${ytState.index + 1}/${ytState.results.length})`, '#ff2d78');
+}
+
+function playYtVideo(videoId) {
+  const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&autoplay=1&enablejsapi=1`;
+  setVideo(embedUrl);
+  // 自動再生中なら次のタイマーをリセット
+  if (ytState.autoPlay) restartAutoTimer();
+}
+
+// ── Auto advance ──
+const ytAutoState = { timer: null, enabled: true };
+
+function toggleAutoPlay() {
+  ytAutoState.enabled = !ytAutoState.enabled;
+  const btn = document.getElementById('btnAutoPlay');
+  if (ytAutoState.enabled) {
+    btn.textContent = '🔄 自動再生 ON';
+    btn.classList.replace('btn-outline', 'btn-grad');
+    restartAutoTimer();
+  } else {
+    btn.textContent = '🔄 自動再生 OFF';
+    btn.classList.replace('btn-grad', 'btn-outline');
+    clearTimeout(ytAutoState.timer);
+  }
+}
+
+function restartAutoTimer() {
+  clearTimeout(ytAutoState.timer);
+  const sec = Math.max(10, parseInt(document.getElementById('autoPlaySec').value) || 60);
+  ytAutoState.timer = setTimeout(() => {
+    if (ytAutoState.enabled && ytState.results.length) {
+      ytState.index = (ytState.index + 1) % ytState.results.length;
+      playYtVideo(ytState.results[ytState.index]);
+      setYtStatus(`🔄 自動: ${ytState.index + 1} / ${ytState.results.length}`, '#9d00ff');
+    }
+  }, sec * 1000);
+}
+
+// Detect YouTube video end via postMessage and auto-advance
+window.addEventListener('message', e => {
+  try {
+    const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+    // playerState 0 = ended
+    const state = data?.info?.playerState ?? data?.info;
+    if (state === 0 && ytState.results.length) {
+      ytState.index = (ytState.index + 1) % ytState.results.length;
+      playYtVideo(ytState.results[ytState.index]);
+      setYtStatus(`▶ 次の動画: ${ytState.index + 1} / ${ytState.results.length}`, '#9d00ff');
+    }
+  } catch {}
+});
+
+function setYtStatus(msg, color) {
+  const el = document.getElementById('ytStatus');
+  el.textContent = msg;
+  el.style.color = color || '#888';
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// OVERLAY TEXT SYSTEM
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// デフォルトテキストリスト（ユーザーが設定画面で自由に編集可能）
+const DEFAULT_OVERLAY_TEXTS = [
+  "もっと集中して",
+  "今は耐えて",
+  "その動きに合わせて",
+  "止まるな",
+  "もっとゆっくり...",
+  "限界まで我慢して",
+  "私の言う通りにして",
+  "今すぐ止まれ",
+  "そのリズムを保って",
+  "あなたには止まれない",
+  "感じるままに",
+  "もっと深く集中して",
+  "諦めるな",
+  "コントロールを失うな",
+  "ここで止まるの？",
+  "もっと頑張れる",
+  "息を整えて",
+  "次の指示を待って",
+  "完璧にこなして",
+  "あなたが主人だ",
+];
+
+let overlayTexts = (() => {
+  try {
+    const saved = localStorage.getItem('em_overlay_texts');
+    return saved ? JSON.parse(saved) : [...DEFAULT_OVERLAY_TEXTS];
+  } catch { return [...DEFAULT_OVERLAY_TEXTS]; }
+})();
+function saveOverlayTexts() {
+  try { localStorage.setItem('em_overlay_texts', JSON.stringify(overlayTexts)); } catch {}
+}
+
+const overlayState = {
+  enabled:  false,
+  rate:     5,       // seconds
+  style:    'center', // 'top' | 'center' | 'bottom'
+  size:     'md',    // 'sm' | 'md' | 'lg'
+  color:    'pink',  // 'pink' | 'cyan' | 'white' | 'red'
+  tick:     null,
+};
+
+const OVERLAY_COLORS = {
+  pink:  { text: '#ff2d78', bg: 'rgba(20,0,10,0.7)',  border: 'rgba(255,45,120,0.4)',  shadow: '0 0 12px rgba(255,45,120,0.6)' },
+  cyan:  { text: '#00f5ff', bg: 'rgba(0,15,20,0.7)',  border: 'rgba(0,245,255,0.4)',   shadow: '0 0 12px rgba(0,245,255,0.6)'  },
+  white: { text: '#ffffff', bg: 'rgba(10,10,20,0.75)', border: 'rgba(255,255,255,0.25)', shadow: '0 0 8px rgba(255,255,255,0.3)' },
+  red:   { text: '#ff4444', bg: 'rgba(20,0,0,0.75)',  border: 'rgba(255,68,68,0.4)',   shadow: '0 0 12px rgba(255,68,68,0.6)'  },
+};
+
+const OVERLAY_SIZES = { sm: '0.8rem', md: '1.05rem', lg: '1.4rem' };
+
+const OVERLAY_POSITIONS = {
+  top:    { top: '12%',  bottom: 'auto' },
+  center: { top: '50%',  bottom: 'auto', transform: 'translateX(-50%) translateY(-50%)' },
+  bottom: { top: 'auto', bottom: '12%' },
+};
+
+const OVERLAY_ANIMS = ['overlay-anim-up', 'overlay-anim-down', 'overlay-anim-pop'];
+
+function toggleOverlay() {
+  overlayState.enabled = !overlayState.enabled;
+  const btn = document.getElementById('btnOverlayToggle');
+  if (overlayState.enabled) {
+    btn.textContent = '💬 オーバーレイ ON';
+    btn.classList.add('btn-grad');
+    btn.classList.remove('btn-outline');
+    startOverlayLoop();
+  } else {
+    btn.textContent = '💬 オーバーレイ OFF';
+    btn.classList.remove('btn-grad');
+    btn.classList.add('btn-outline');
+    stopOverlayLoop();
+    document.getElementById('overlayLayer').innerHTML = '';
+  }
+}
+
+function startOverlayLoop() {
+  stopOverlayLoop();
+  showOverlayText(); // immediate first shot
+  S.overlayTick = setInterval(showOverlayText, overlayState.rate * 1000);
+}
+
+function stopOverlayLoop() {
+  clearInterval(S.overlayTick);
+  S.overlayTick = null;
+}
+
+function showOverlayText() {
+  if (!overlayTexts.length) return;
+
+  // フルスクリーン中はFS用レイヤーへ
+  const layerId = isFullscreen() ? 'fsOverlayLayer' : 'overlayLayer';
+  const layer   = document.getElementById(layerId);
+  layer.innerHTML = '';
+
+  const text = rand(overlayTexts);
+  const dur  = Math.max(2.5, overlayState.rate * 0.85);
+
+  // ランダム位置（端に寄りすぎないよう15〜80%の範囲）
+  const top  = (15 + Math.random() * 65).toFixed(1) + '%';
+  const left = (20 + Math.random() * 60).toFixed(1) + '%';
+
+  // FSではフォントを大きめに
+  const fontSize = isFullscreen() ? '2.2rem' : '1.5rem';
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'overlay-txt';
+  // -18〜+18度のランダム傾き（読める範囲）
+  const tilt = (Math.random() - 0.5) * 36;
+  wrapper.style.cssText = `top:${top}; left:${left}; font-size:${fontSize}; rotate:${tilt}deg;`;
+
+  // バラバラ: 1文字ずつspanに分解してランダム散乱アニメーション
+  [...text].forEach((ch, i) => {
+    const span = document.createElement('span');
+    span.className = 'overlay-char';
+    span.textContent = ch === ' ' ? '\u00A0' : ch;
+    const dx = (Math.random() - 0.5) * 280;
+    const dy = (Math.random() - 0.5) * 280;
+    const dr = (Math.random() - 0.5) * 150;
+    span.style.cssText = `--dx:${dx}px; --dy:${dy}px; --dr:${dr}deg; --i:${i}; --dur:${dur}s;`;
+    wrapper.appendChild(span);
+  });
+
+  layer.appendChild(wrapper);
+  const totalMs = (dur + text.length * 0.045) * 1000 + 200;
+  setTimeout(() => { if (wrapper.parentNode) wrapper.remove(); }, totalMs);
+}
+
+function updateOverlayRate(v) {
+  overlayState.rate = Math.max(2, Math.min(30, parseInt(v) || 5));
+  if (overlayState.enabled) startOverlayLoop();
+}
+
+// Style / size / color setters
+function setOverlayStyle(s) {
+  overlayState.style = s;
+  document.querySelectorAll('.style-btn').forEach(b => {
+    const on = b.dataset.style === s;
+    b.classList.toggle('btn-grad', on);
+    b.classList.toggle('btn-outline', !on);
+    b.classList.toggle('active', on);
+  });
+}
+function setOverlaySize(s) {
+  overlayState.size = s;
+  document.querySelectorAll('.sz-btn').forEach(b => {
+    const on = b.dataset.sz === s;
+    b.classList.toggle('btn-grad', on);
+    b.classList.toggle('btn-outline', !on);
+  });
+}
+function setOverlayColor(c) {
+  overlayState.color = c;
+  document.querySelectorAll('.col-btn').forEach(b => {
+    const on = b.dataset.col === c;
+    b.classList.toggle('btn-grad', on);
+    b.classList.toggle('btn-outline', !on);
+  });
+}
+
+// Settings modal
+function openOverlaySettings() {
+  renderOverlayTextList();
+  document.getElementById('overlaySettingsModal').classList.remove('hidden');
+}
+function closeOverlaySettings() {
+  document.getElementById('overlaySettingsModal').classList.add('hidden');
+}
+
+function renderOverlayTextList() {
+  const list = document.getElementById('overlayTextList');
+  list.innerHTML = '';
+  overlayTexts.forEach((txt, i) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2 px-3 py-1.5 bg-gray-900 rounded-lg hover:bg-gray-800 group transition-all cursor-pointer';
+    row.innerHTML = `
+      <span class="flex-1 text-sm text-gray-300 truncate">${txt}</span>
+      <button onclick="removeOverlayText(${i})" class="text-gray-700 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-all">✕</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+function quickAddOverlayText() {
+  const input = document.getElementById('quickOverlayText');
+  const lines = input.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (!lines.length) return;
+  overlayTexts.push(...lines);
+  input.value = '';
+  saveOverlayTexts();
+  renderQuickTextList();
+  renderOverlayTextList();
+}
+
+function renderQuickTextList() {
+  const count = document.getElementById('quickOverlayCount');
+  count.textContent = `全 ${overlayTexts.length} 件`;
+  const inner = document.getElementById('quickTextListInner');
+  inner.innerHTML = '';
+  overlayTexts.forEach((t, i) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-1 group';
+    row.innerHTML = `
+      <span class="flex-1 text-xs text-gray-400 truncate">${t}</span>
+      <button onclick="overlayTexts.splice(${i},1);saveOverlayTexts();renderQuickTextList();renderOverlayTextList()"
+        class="text-gray-700 hover:text-red-400 text-xs opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">✕</button>`;
+    inner.appendChild(row);
+  });
+}
+
+function toggleQuickTextList() {
+  const list = document.getElementById('quickTextList');
+  const btn  = document.getElementById('btnToggleTextList');
+  const open = list.classList.toggle('hidden');
+  btn.textContent = open ? '▼ 一覧' : '▲ 閉じる';
+  if (!open) renderQuickTextList();
+}
+
+function addOverlayText() {
+  const input = document.getElementById('newOverlayText');
+  const lines = input.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  if (!lines.length) return;
+  overlayTexts.push(...lines);
+  input.value = '';
+  saveOverlayTexts();
+  renderOverlayTextList();
+}
+
+function removeOverlayText(i) {
+  overlayTexts.splice(i, 1);
+  saveOverlayTexts();
+  renderOverlayTextList();
+}
+
+function resetOverlayTexts() {
+  overlayTexts = [...DEFAULT_OVERLAY_TEXTS];
+  saveOverlayTexts();
+  renderOverlayTextList();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// METRONOME
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const metronomeState = {
+  enabled: false,
+  patterns: [{min:40, max:80}, {min:90, max:130}, {min:150, max:200}],
+  bpm: 60,
+  changeInterval: 8,
+  vol: 0.5,
+  beat: 0,
+  timer: null,
+  changeTimer: null,
+  audioCtx: null
+};
+
+function renderMetronomePatterns() {
+  const list = document.getElementById('metronomePatternList');
+  if (!list) return;
+  list.innerHTML = '';
+  metronomeState.patterns.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-1';
+    row.innerHTML = `
+      <span class="text-xs text-gray-700 w-3">${i+1}</span>
+      <span class="text-xs text-gray-600">MIN</span>
+      <input type="number" min="20" max="300" value="${p.min}"
+        oninput="metronomeState.patterns[${i}].min=parseInt(this.value)||20"
+        class="w-14 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-center focus:border-cyan-500 focus:outline-none">
+      <span class="text-xs text-gray-600">MAX</span>
+      <input type="number" min="20" max="300" value="${p.max}"
+        oninput="metronomeState.patterns[${i}].max=parseInt(this.value)||20"
+        class="w-14 bg-gray-900 border border-gray-700 rounded px-2 py-1 text-xs text-center focus:border-cyan-500 focus:outline-none">
+      ${metronomeState.patterns.length > 1
+        ? `<button onclick="removeMetronomePattern(${i})" class="ml-auto text-gray-700 hover:text-red-400 text-xs px-1 transition-all">✕</button>`
+        : '<span class="ml-auto w-5"></span>'}
+    `;
+    list.appendChild(row);
+  });
+}
+
+function addMetronomePattern() {
+  metronomeState.patterns.push({min:60, max:120});
+  renderMetronomePatterns();
+}
+
+function removeMetronomePattern(i) {
+  if (metronomeState.patterns.length <= 1) return;
+  metronomeState.patterns.splice(i, 1);
+  renderMetronomePatterns();
+}
+
+function getRandomBpm() {
+  const p = metronomeState.patterns[Math.floor(Math.random() * metronomeState.patterns.length)];
+  const min = Math.min(p.min, p.max);
+  const max = Math.max(p.min, p.max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getAudioCtx() {
+  if (!metronomeState.audioCtx) {
+    metronomeState.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return metronomeState.audioCtx;
+}
+
+function metronomeTick() {
+  metronomeState.beat++;
+  const b = ((metronomeState.beat - 1) % 4) + 1;
+
+  const ctx = getAudioCtx();
+  const osc  = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.frequency.value = b === 1 ? 1200 : 800;
+  gain.gain.setValueAtTime(metronomeState.vol, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 0.05);
+
+  const beatEl = document.getElementById('metronomeBeat');
+  if (beatEl) {
+    beatEl.textContent = b;
+    beatEl.style.color = b === 1 ? '#ff2d78' : '#00f5ff';
+  }
+}
+
+function applyNewBpm() {
+  const newBpm = getRandomBpm();
+  metronomeState.bpm = newBpm;
+  document.getElementById('metronomeBpmLabel').textContent = newBpm + ' BPM';
+  clearInterval(metronomeState.timer);
+  metronomeState.timer = setInterval(metronomeTick, 60000 / newBpm);
+}
+
+function startMetronome() {
+  stopMetronome();
+  if (!metronomeState.enabled) return;
+  applyNewBpm();
+  metronomeTick();
+  // 指定秒数ごとにBPMをランダム変化
+  const sec = Math.max(1, metronomeState.changeInterval) * 1000;
+  metronomeState.changeTimer = setInterval(applyNewBpm, sec);
+}
+
+function stopMetronome() {
+  clearInterval(metronomeState.timer);
+  clearInterval(metronomeState.changeTimer);
+  metronomeState.timer = null;
+  metronomeState.changeTimer = null;
+  metronomeState.beat = 0;
+  const beatEl = document.getElementById('metronomeBeat');
+  if (beatEl) { beatEl.textContent = '-'; beatEl.style.color = '#00f5ff'; }
+}
+
+function toggleMetronome() {
+  metronomeState.enabled = !metronomeState.enabled;
+  const btn = document.getElementById('btnMetronome');
+  if (metronomeState.enabled) {
+    btn.textContent = '🥁 ON';
+    btn.classList.replace('btn-outline', 'btn-grad');
+    if (S.running) startMetronome();
+  } else {
+    btn.textContent = '🥁 OFF';
+    btn.classList.replace('btn-grad', 'btn-outline');
+    stopMetronome();
+  }
+}
+
+
+// Patch overlayTick into S object
+S.overlayTick = null;
+
+// Escape key → フルスクリーン終了
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && isFullscreen()) exitFsMode();
+});
+</script>
+
+</body>
+</html>
