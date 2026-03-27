@@ -287,20 +287,9 @@ body { animation: bgPulse 8s ease-in-out infinite; }
       <p class="text-gray-600 text-xs tracking-widest">TEASE &amp; CHALLENGE</p>
     </div>
 
-    <!-- Level + XP -->
-    <div class="flex items-center gap-4">
-      <div class="text-right hidden sm:block">
-        <div class="text-gray-600 text-xs tracking-wider">LEVEL</div>
-        <div id="hdrLevel" class="font-orb text-2xl font-bold text-purple-400 glow-purple leading-none">01</div>
-      </div>
-      <div class="w-28">
-        <div class="flex justify-between text-xs text-gray-600 mb-1">
-          <span>XP</span><span><span id="hdrXP">0</span>/<span id="hdrXPNext">100</span></span>
-        </div>
-        <div class="bg-gray-800 rounded-full h-2 overflow-hidden">
-          <div id="hdrXPBar" class="xp-bar h-full rounded-full" style="width:0%"></div>
-        </div>
-      </div>
+    <div class="hidden">
+      <div id="hdrLevel"></div><div id="hdrXP"></div>
+      <div id="hdrXPNext"></div><div id="hdrXPBar"></div>
     </div>
   </header>
 
@@ -507,30 +496,9 @@ body { animation: bgPulse 8s ease-in-out infinite; }
             <span id="videoVolLabel" class="text-xs text-pink-400 font-bold w-8 text-right">100</span>
           </div>
 
-          <!-- Custom URL input -->
-          <div class="mt-3 border-t border-gray-800 pt-3">
-            <div class="text-xs text-gray-600 mb-1">URL を直接入力（YouTube URL 自動変換対応）</div>
-            <div class="flex gap-2">
-              <input id="customUrlInput" type="text" placeholder="https://www.youtube.com/watch?v=..."
-                class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-pink-500 focus:outline-none"
-                onkeydown="if(event.key==='Enter') loadCustomUrl()">
-              <button onclick="loadCustomUrl()" class="btn-grad px-3 py-2 rounded-lg text-xs font-bold">▶ 再生</button>
-            </div>
-            <div id="urlConvertHint" class="text-xs text-gray-700 mt-1 hidden"></div>
-          </div>
-        </div>
-
-        <!-- URL Library -->
-        <div class="bg-gray-950/80 border border-gray-800 rounded-2xl p-4">
-          <div class="font-orb text-xs text-purple-400 tracking-widest mb-2">URL LIBRARY</div>
-          <div class="text-xs text-gray-700 mb-3">クリックで読み込み • ✕で削除</div>
-          <div id="urlLibraryList" class="space-y-1 max-h-44 overflow-y-auto pr-1"></div>
-          <div class="flex gap-2 mt-3">
-            <input id="newUrlInput" type="text" placeholder="URL を追加..."
-              class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs focus:border-purple-500 focus:outline-none">
-            <button onclick="addUrl()" class="bg-purple-950 hover:bg-purple-900 border border-purple-800 px-3 py-2 rounded-lg text-xs transition-all">
-              ＋追加
-            </button>
+          <div class="hidden">
+            <input id="customUrlInput"><div id="urlConvertHint"></div>
+            <input id="newUrlInput"><div id="urlLibraryList"></div>
           </div>
         </div>
 
@@ -569,15 +537,8 @@ body { animation: bgPulse 8s ease-in-out infinite; }
       <div id="fsTimerDisplay"></div><div id="fsTimerStatus"></div>
     </div>
 
-    <!-- Level + XP -->
-    <div class="text-right">
-      <div class="flex items-center gap-2 justify-end">
-        <div class="text-xs text-gray-500">LV</div>
-        <div id="fsLevel" class="font-orb text-xl font-bold text-purple-400" style="text-shadow:0 0 10px #9d00ff;">01</div>
-      </div>
-      <div class="bg-gray-800/60 rounded-full h-1.5 w-24 overflow-hidden mt-1">
-        <div id="fsXPBar" class="xp-bar h-full rounded-full" style="width:0%"></div>
-      </div>
+    <div class="hidden">
+      <div id="fsLevel"></div><div id="fsXPBar"></div>
     </div>
   </div>
 
