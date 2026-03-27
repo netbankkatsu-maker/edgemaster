@@ -209,20 +209,21 @@ body { animation: bgPulse 8s ease-in-out infinite; }
 }
 .overlay-txt {
   position: absolute;
+  left: 50% !important;
   transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 20;
   text-align: center;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   padding: 10px 20px;
   border-radius: 10px;
-  width: 75vw;
-  max-width: 75vw;
+  width: 88vw;
+  max-width: 88vw;
   white-space: normal;
   word-break: break-word;
   overflow-wrap: break-word;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 .overlay-char {
   display: inline-block;
@@ -1717,13 +1718,16 @@ function showOverlayText() {
   const top  = (15 + Math.random() * 65).toFixed(1) + '%';
   const left = (50 + (Math.random() - 0.5) * 30).toFixed(1) + '%';
 
-  const fontSize = OVERLAY_SIZES[overlayState.size] || '1.8rem';
+  const basePx = parseFloat(OVERLAY_SIZES[overlayState.size] || '1.8');
+  // 文字数が多いほど縮小（最小0.9rem）
+  const scaledPx = text.length > 10 ? Math.max(0.9, basePx * 10 / text.length) : basePx;
+  const fontSize = scaledPx.toFixed(2) + 'rem';
   const fontCss  = (OVERLAY_FONTS.find(f => f.id === overlayState.font) || OVERLAY_FONTS[0]).css;
 
   const wrapper = document.createElement('div');
   wrapper.className = 'overlay-txt';
   const tilt = (Math.random() - 0.5) * 36;
-  wrapper.style.cssText = `top:${top}; left:${left}; font-size:${fontSize}; rotate:${tilt}deg; font-family:${fontCss};`;
+  wrapper.style.cssText = `top:${top}; font-size:${fontSize}; rotate:${tilt}deg; font-family:${fontCss};`;
 
   // バラバラ: 1文字ずつspanに分解してランダム散乱アニメーション
   [...text].forEach((ch, i) => {
