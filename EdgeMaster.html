@@ -215,10 +215,12 @@ body { animation: bgPulse 8s ease-in-out infinite; }
   text-align: center;
   font-weight: 900;
   letter-spacing: 0.08em;
-  padding: 10px 28px;
+  padding: 10px 20px;
   border-radius: 10px;
-  max-width: 85%;
-  white-space: nowrap;
+  max-width: 80%;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
 }
 .overlay-char {
   display: inline-block;
@@ -594,12 +596,19 @@ body { animation: bgPulse 8s ease-in-out infinite; }
 
     <!-- Font size -->
     <div class="mb-4">
-      <div class="text-xs text-gray-600 mb-2 tracking-wider">文字サイズ（位置はランダム自動）</div>
-      <div class="grid grid-cols-3 gap-2">
+      <div class="text-xs text-gray-600 mb-2 tracking-wider">文字サイズ</div>
+      <div class="grid grid-cols-4 gap-2">
         <button onclick="setOverlaySize('sm')" data-sz="sm" class="sz-btn btn-outline py-2 rounded-lg text-xs">小</button>
         <button onclick="setOverlaySize('md')" data-sz="md" class="sz-btn btn-outline py-2 rounded-lg text-xs active btn-grad">中</button>
         <button onclick="setOverlaySize('lg')" data-sz="lg" class="sz-btn btn-outline py-2 rounded-lg text-xs">大</button>
+        <button onclick="setOverlaySize('xl')" data-sz="xl" class="sz-btn btn-outline py-2 rounded-lg text-xs">特大</button>
       </div>
+    </div>
+
+    <!-- Font family -->
+    <div class="mb-4">
+      <div class="text-xs text-gray-600 mb-2 tracking-wider">フォント</div>
+      <div id="fontList" class="grid grid-cols-2 gap-2"></div>
     </div>
 
     <div class="border-t border-gray-800 mb-4"></div>
@@ -1630,10 +1639,11 @@ function saveOverlayTexts() {
 
 const overlayState = {
   enabled:  false,
-  rate:     5,       // seconds
-  style:    'center', // 'top' | 'center' | 'bottom'
-  size:     'md',    // 'sm' | 'md' | 'lg'
-  color:    'pink',  // 'pink' | 'cyan' | 'white' | 'red'
+  rate:     5,
+  style:    'center',
+  size:     'md',
+  font:     'default',
+  color:    'pink',
   tick:     null,
 };
 
@@ -1644,7 +1654,16 @@ const OVERLAY_COLORS = {
   red:   { text: '#ff4444', bg: 'rgba(20,0,0,0.75)',  border: 'rgba(255,68,68,0.4)',   shadow: '0 0 12px rgba(255,68,68,0.6)'  },
 };
 
-const OVERLAY_SIZES = { sm: '0.8rem', md: '1.05rem', lg: '1.4rem' };
+const OVERLAY_SIZES = { sm: '1.2rem', md: '1.8rem', lg: '2.6rem', xl: '3.8rem' };
+
+const OVERLAY_FONTS = [
+  { id: 'default',  label: 'デフォルト',  css: "'Rajdhani','Hiragino Sans',sans-serif" },
+  { id: 'orbitron', label: 'Orbitron',    css: "'Orbitron',monospace" },
+  { id: 'gothic',   label: 'ゴシック',    css: "'Hiragino Kaku Gothic ProN','Yu Gothic',sans-serif" },
+  { id: 'mincho',   label: '明朝体',      css: "'Hiragino Mincho ProN','Yu Mincho',serif" },
+  { id: 'rounded',  label: '丸ゴシック',  css: "'Hiragino Maru Gothic ProN','M PLUS Rounded 1c',sans-serif" },
+  { id: 'serif',    label: 'セリフ',      css: "Georgia,'Times New Roman',serif" },
+];
 
 const OVERLAY_POSITIONS = {
   top:    { top: '12%',  bottom: 'auto' },
@@ -1697,14 +1716,13 @@ function showOverlayText() {
   const top  = (15 + Math.random() * 65).toFixed(1) + '%';
   const left = (20 + Math.random() * 60).toFixed(1) + '%';
 
-  // FSではフォントを大きめに
-  const fontSize = isFullscreen() ? '2.2rem' : '1.5rem';
+  const fontSize = OVERLAY_SIZES[overlayState.size] || '1.8rem';
+  const fontCss  = (OVERLAY_FONTS.find(f => f.id === overlayState.font) || OVERLAY_FONTS[0]).css;
 
   const wrapper = document.createElement('div');
   wrapper.className = 'overlay-txt';
-  // -18〜+18度のランダム傾き（読める範囲）
   const tilt = (Math.random() - 0.5) * 36;
-  wrapper.style.cssText = `top:${top}; left:${left}; font-size:${fontSize}; rotate:${tilt}deg;`;
+  wrapper.style.cssText = `top:${top}; left:${left}; font-size:${fontSize}; rotate:${tilt}deg; font-family:${fontCss};`;
 
   // バラバラ: 1文字ずつspanに分解してランダム散乱アニメーション
   [...text].forEach((ch, i) => {
@@ -1755,9 +1773,30 @@ function setOverlayColor(c) {
   });
 }
 
+function setOverlayFont(id) {
+  overlayState.font = id;
+  renderFontList();
+}
+
+function renderFontList() {
+  const container = document.getElementById('fontList');
+  if (!container) return;
+  container.innerHTML = '';
+  OVERLAY_FONTS.forEach(f => {
+    const btn = document.createElement('button');
+    const active = overlayState.font === f.id;
+    btn.className = active ? 'btn-grad py-2 rounded-lg text-xs' : 'btn-outline py-2 rounded-lg text-xs';
+    btn.style.fontFamily = f.css;
+    btn.textContent = f.label;
+    btn.onclick = () => setOverlayFont(f.id);
+    container.appendChild(btn);
+  });
+}
+
 // Settings modal
 function openOverlaySettings() {
   renderOverlayTextList();
+  renderFontList();
   document.getElementById('overlaySettingsModal').classList.remove('hidden');
 }
 function closeOverlaySettings() {
