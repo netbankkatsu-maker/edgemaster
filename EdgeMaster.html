@@ -443,9 +443,12 @@ body { animation: bgPulse 8s ease-in-out infinite; }
               <button onclick="quickAddOverlayText()" class="btn-grad px-3 rounded-lg text-xs font-bold self-stretch">追加</button>
             </div>
             <!-- テキスト一覧 -->
-            <div id="quickTextList" class="hidden bg-gray-900 border border-gray-800 rounded-lg p-2 max-h-40 overflow-y-auto space-y-1">
-              <div id="quickTextListInner" class="space-y-1"></div>
-              <button onclick="resetOverlayTexts();renderQuickTextList()" class="w-full text-xs text-gray-600 hover:text-gray-400 mt-1 transition-all">↺ デフォルトに戻す</button>
+            <div id="quickTextList" class="hidden bg-gray-900 border border-gray-800 rounded-lg p-2 space-y-1">
+              <div id="quickTextListInner" class="space-y-1 max-h-60 overflow-y-auto"></div>
+              <div class="flex gap-2 mt-2">
+                <button onclick="clearAllOverlayTexts()" class="flex-1 text-xs text-red-600 hover:text-red-400 border border-dashed border-red-900 hover:border-red-600 rounded-lg py-1 transition-all">🗑 全削除</button>
+                <button onclick="resetOverlayTexts();renderQuickTextList()" class="flex-1 text-xs text-gray-600 hover:text-gray-400 border border-dashed border-gray-800 hover:border-gray-600 rounded-lg py-1 transition-all">↺ デフォルトに戻す</button>
+              </div>
             </div>
             <div id="quickOverlayCount" class="text-xs text-gray-700 mt-1 text-center"></div>
           </div>
@@ -493,6 +496,15 @@ body { animation: bgPulse 8s ease-in-out infinite; }
                 <span>秒</span>
               </div>
             </div>
+          </div>
+
+          <!-- Video volume -->
+          <div class="flex items-center gap-2 mt-2">
+            <span class="text-xs text-gray-600 whitespace-nowrap">🔊 音量</span>
+            <input id="videoVolSlider" type="range" min="0" max="100" value="100"
+              oninput="setVideoVolume(this.value)"
+              class="flex-1" style="accent-color:#ff2d78;">
+            <span id="videoVolLabel" class="text-xs text-pink-400 font-bold w-8 text-right">100</span>
           </div>
 
           <!-- Custom URL input -->
@@ -894,22 +906,6 @@ function startSession() {
   S.running = true;
   S.paused  = false;
   setControlState('running');
-  document.getElementById('timerStatus').textContent = 'RUNNING';
-  document.getElementById('durationPanel').style.opacity = '0.4';
-  document.getElementById('durationPanel').style.pointerEvents = 'none';
-
-  if (!S.sessionTick) {
-    S.sessionTick = setInterval(() => {
-      if (!S.paused) {
-        S.remaining--;
-        renderTimerDisplay();
-        if (S.remaining <= 0) endSession();
-      }
-    }, 1000);
-  }
-
-  scheduleNextChallenge();
-  showMsg(rand(MSGS.start), 'pink');
   stopAmbient();
   if (metronomeState.enabled) startMetronome();
   enterFsMode();
@@ -937,11 +933,8 @@ function enterFsMode() {
     toggleOverlay();
   }
 
-  // 動画の自動送りを有効化（検索結果がある場合）
-  if (ytState.results.length && !ytAutoState.enabled) {
-    ytAutoState.enabled = true;
-    const btn = document.getElementById('btnAutoPlay');
-    if (btn) { btn.textContent = '🔄 自動再生 ON'; btn.classList.replace('btn-outline','btn-grad'); }
+  // 動画の自動送りタイマーを開始
+  if (ytState.results.length && ytAutoState.enabled) {
     restartAutoTimer();
   }
 
@@ -1380,6 +1373,14 @@ function loadRandom() {
 let currentVideoUrl = '';
 
 // 動画をセットする唯一の関数 — 常にここを通す
+function setVideoVolume(val) {
+  document.getElementById('videoVolLabel').textContent = val;
+  const msg = JSON.stringify({event:'command', func:'setVolume', args:[parseInt(val)]});
+  ['inspFrame','fsFrame'].forEach(id => {
+    try { document.getElementById(id).contentWindow.postMessage(msg, '*'); } catch {}
+  });
+}
+
 function setVideo(url) {
   currentVideoUrl = url;
   // フルスクリーン中ならfsFrameへ、そうでなければinspFrameへ
@@ -1576,8 +1577,7 @@ function randomYouTubeResult() {
 function playYtVideo(videoId) {
   const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0&autoplay=1&enablejsapi=1`;
   setVideo(embedUrl);
-  // 自動再生中なら次のタイマーをリセット
-  if (ytState.autoPlay) restartAutoTimer();
+  if (ytAutoState.enabled) restartAutoTimer();
 }
 
 // ── Auto advance ──
@@ -1871,6 +1871,14 @@ function removeOverlayText(i) {
 function resetOverlayTexts() {
   overlayTexts = [...DEFAULT_OVERLAY_TEXTS];
   saveOverlayTexts();
+  renderOverlayTextList();
+}
+
+function clearAllOverlayTexts() {
+  if (!confirm('全てのテキストを削除しますか？')) return;
+  overlayTexts = [];
+  saveOverlayTexts();
+  renderQuickTextList();
   renderOverlayTextList();
 }
 
