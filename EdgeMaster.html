@@ -217,9 +217,11 @@ body { animation: bgPulse 8s ease-in-out infinite; }
   letter-spacing: 0.08em;
   padding: 10px 20px;
   border-radius: 10px;
-  max-width: 80%;
+  width: 75vw;
+  max-width: 75vw;
   white-space: normal;
   word-break: break-word;
+  overflow-wrap: break-word;
   line-height: 1.4;
 }
 .overlay-char {
@@ -588,7 +590,7 @@ body { animation: bgPulse 8s ease-in-out infinite; }
      OVERLAY SETTINGS MODAL
 ════════════════════════════════════════ -->
 <div id="overlaySettingsModal" class="hidden fixed inset-0 z-40 modal-bg flex items-center justify-center p-4">
-  <div class="bg-gray-950 border border-pink-900 rounded-2xl p-6 w-full max-w-md slide-up box-glow-pink">
+  <div class="bg-gray-950 border border-pink-900 rounded-2xl p-6 w-full max-w-md slide-up box-glow-pink overflow-y-auto" style="max-height:90vh;">
     <div class="flex items-center justify-between mb-4">
       <div class="font-orb text-sm text-pink-400 tracking-widest">OVERLAY TEXT 設定</div>
       <button onclick="closeOverlaySettings()" class="text-gray-600 hover:text-white text-lg leading-none">✕</button>
@@ -1712,9 +1714,8 @@ function showOverlayText() {
   const text = rand(overlayTexts);
   const dur  = Math.max(2.5, overlayState.rate * 0.85);
 
-  // ランダム位置（端に寄りすぎないよう15〜80%の範囲）
   const top  = (15 + Math.random() * 65).toFixed(1) + '%';
-  const left = (20 + Math.random() * 60).toFixed(1) + '%';
+  const left = (50 + (Math.random() - 0.5) * 30).toFixed(1) + '%';
 
   const fontSize = OVERLAY_SIZES[overlayState.size] || '1.8rem';
   const fontCss  = (OVERLAY_FONTS.find(f => f.id === overlayState.font) || OVERLAY_FONTS[0]).css;
