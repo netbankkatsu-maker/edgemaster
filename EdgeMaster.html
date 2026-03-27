@@ -311,60 +311,25 @@ body { animation: bgPulse 8s ease-in-out infinite; }
       <!-- ── COL 1: Timer + Controls ── -->
       <div class="space-y-5">
 
-        <!-- Timer card -->
+        <!-- Start card -->
         <div class="bg-gray-950/80 border border-gray-800 rounded-2xl p-5 box-glow-pink">
-          <div class="font-orb text-xs text-pink-400 tracking-widest mb-4">SESSION TIMER</div>
-
-          <!-- Ring -->
-          <div class="flex justify-center mb-5">
-            <div class="relative w-44 h-44">
-              <svg class="timer-svg w-full h-full" viewBox="0 0 180 180">
-                <defs>
-                  <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stop-color="#ff2d78"/>
-                    <stop offset="100%" stop-color="#9d00ff"/>
-                  </linearGradient>
-                </defs>
-                <circle cx="90" cy="90" r="78" fill="none" stroke="#1a1a2e" stroke-width="10"/>
-                <circle id="timerRing" class="progress" cx="90" cy="90" r="78"
-                  fill="none" stroke="url(#ringGrad)" stroke-width="10"
-                  stroke-dasharray="490.09" stroke-dashoffset="0"/>
-              </svg>
-              <div class="absolute inset-0 flex flex-col items-center justify-center">
-                <div id="timerDisplay" class="font-orb text-3xl font-bold">10:00</div>
-                <div id="timerStatus" class="text-gray-600 text-xs tracking-wider mt-1">READY</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Duration presets -->
-          <div id="durationPanel">
-            <div class="text-xs text-gray-600 mb-2 tracking-wider">セッション時間</div>
-            <div class="grid grid-cols-4 gap-2 mb-2">
-              <button onclick="setDuration(5)"  data-d="5"  class="dur-btn btn-outline py-2 rounded-lg text-sm">5分</button>
-              <button onclick="setDuration(10)" data-d="10" class="dur-btn btn-outline py-2 rounded-lg text-sm active">10分</button>
-              <button onclick="setDuration(15)" data-d="15" class="dur-btn btn-outline py-2 rounded-lg text-sm">15分</button>
-              <button onclick="setDuration(20)" data-d="20" class="dur-btn btn-outline py-2 rounded-lg text-sm">20分</button>
-            </div>
-            <div class="flex gap-2">
-              <input id="customDur" type="number" min="1" max="120" placeholder="カスタム (分)"
-                class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-center focus:border-pink-500 focus:outline-none">
-              <button onclick="applyCustomDur()" class="btn-outline px-3 py-2 rounded-lg text-sm">SET</button>
-            </div>
-          </div>
-
-          <!-- Control buttons -->
-          <div class="grid grid-cols-3 gap-2 mt-4">
-            <button id="btnStart" onclick="startSession()" class="btn-grad col-span-2 py-3 rounded-xl font-orb font-bold text-sm tracking-wider">
+          <div class="grid grid-cols-3 gap-2">
+            <button id="btnStart" onclick="startSession()" class="btn-grad col-span-2 py-4 rounded-xl font-orb font-bold text-base tracking-wider">
               ▶ スタート
             </button>
             <button id="btnPause" onclick="pauseSession()" disabled
-              class="btn-outline py-3 rounded-xl font-bold text-lg disabled:opacity-30 disabled:cursor-not-allowed">⏸</button>
+              class="btn-outline py-4 rounded-xl font-bold text-xl disabled:opacity-30 disabled:cursor-not-allowed">⏸</button>
           </div>
           <button id="btnStop" onclick="stopSession()" disabled
             class="mt-2 w-full bg-red-950 hover:bg-red-900 border border-red-900 py-2 rounded-xl text-red-400 text-sm transition-all disabled:opacity-30 disabled:cursor-not-allowed">
-            ■ セッション終了
+            ■ 終了
           </button>
+          <!-- hidden stubs for JS -->
+          <div class="hidden">
+            <div id="timerDisplay"></div><div id="timerStatus"></div>
+            <div id="durationPanel"></div><div id="timerRing"></div>
+            <input id="customDur">
+          </div>
         </div>
 
         <!-- Metronome -->
@@ -588,10 +553,8 @@ body { animation: bgPulse 8s ease-in-out infinite; }
       ✕ 設定に戻る
     </button>
 
-    <!-- Timer -->
-    <div class="text-center">
-      <div id="fsTimerDisplay" class="font-orb text-3xl font-bold text-white" style="text-shadow:0 0 20px rgba(255,45,120,0.8);">00:00</div>
-      <div id="fsTimerStatus" class="text-xs text-gray-400 tracking-wider">READY</div>
+    <div class="hidden">
+      <div id="fsTimerDisplay"></div><div id="fsTimerStatus"></div>
     </div>
 
     <!-- Level + XP -->
@@ -1346,23 +1309,7 @@ function showMsg(text, color) {
   }, 280);
 }
 
-function floatMsg(text, color, bottom) {
-  // フルスクリーン中はFS用コンテナへ、それ以外は通常コンテナへ
-  const rootId = isFullscreen() ? 'fsFloatRoot' : 'floatRoot';
-  const root   = document.getElementById(rootId);
-  const el     = document.createElement('div');
-  el.className = 'float-msg';
-  el.style.cssText = `
-    color: ${color};
-    text-shadow: 0 0 10px ${color};
-    background: rgba(0,0,0,0.6);
-    border: 1px solid ${color}55;
-    bottom: ${bottom || 100}px;
-  `;
-  el.textContent = text;
-  root.appendChild(el);
-  setTimeout(() => el.remove(), 2600);
-}
+function floatMsg(text, color, bottom) { /* disabled */ }
 
 let ambientIdx = 0;
 function startAmbient() {
